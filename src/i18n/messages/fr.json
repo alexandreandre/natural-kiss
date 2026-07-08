@@ -1,0 +1,132 @@
+{
+  "app": {
+    "name": "Natural Kiss",
+    "tagline": "Suivi production-export, augmenté par l'IA",
+    "shortName": "NK"
+  },
+  "nav": {
+    "home": "Accueil",
+    "lots": "Lots",
+    "tracking": "Suivi conteneur",
+    "language": "Langue",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "themeSystem": "Système"
+  },
+  "home": {
+    "heroKicker": "Plateforme",
+    "heroTitle": "Tout le flux export, autour d'un objet central : le lot",
+    "heroSubtitle": "Du premier contact client au retour qualité et à la clôture — chaque conteneur suivi de bout en bout.",
+    "modulesTitle": "Modules de la plateforme",
+    "modulesSubtitle": "Livrés brique par brique. Les modules à venir sont visibles mais désactivés.",
+    "recentLotsTitle": "Lots récents",
+    "recentLotsSubtitle": "Données réelles lues depuis Supabase.",
+    "viewAll": "Voir tous les lots",
+    "noLots": "Aucun lot. Lancez « npm run db:reset » pour peupler la base de démo.",
+    "dbError": "Base de données injoignable. Vérifiez .env.local et que Supabase tourne."
+  },
+  "strate": {
+    "socle": "Socle permanent",
+    "rail_client": "Rail client",
+    "rail_lot": "Rail lot",
+    "transverse": "Couches transverses"
+  },
+  "module": {
+    "status": { "active": "Actif", "soon": "À venir" },
+    "brique": "Brique {n}",
+    "referentiel": {
+      "title": "Référentiel",
+      "desc": "Source unique : produits, clients, sites, transporteurs."
+    },
+    "tracabilite_champ": {
+      "title": "Traçabilité champ",
+      "desc": "Origine parcelle/récolte et stocks (Cropwise)."
+    },
+    "coffre_certifs": {
+      "title": "Coffre certifications",
+      "desc": "GlobalG.A.P., GRASP, BRCGS… avec alertes d'expiration."
+    },
+    "demande": {
+      "title": "Demande & qualification",
+      "desc": "Réception d'une demande, matching automatique des certifs."
+    },
+    "onboarding": {
+      "title": "Onboarding & specs",
+      "desc": "Client qualifié → client actif, création de l'espace."
+    },
+    "commande_planning": {
+      "title": "Commande & planning",
+      "desc": "Planning semaine par semaine, prévu vs réalisé."
+    },
+    "booking": {
+      "title": "Booking",
+      "desc": "La réservation de la ligne arme le dossier d'expédition."
+    },
+    "chargement": {
+      "title": "Conditionnement & chargement",
+      "desc": "QR / photo au chargement, preuve produit, datalogger."
+    },
+    "documents_gate": {
+      "title": "Documents & Gate",
+      "desc": "Vérificateur IA + verrou « Check OK » avant départ."
+    },
+    "tracking": {
+      "title": "Transport & suivi",
+      "desc": "Tout le voyage d'un conteneur à partir de son numéro."
+    },
+    "arrivee_douane": {
+      "title": "Arrivée & douane",
+      "desc": "Dédouanement, CHED, livraison door-to-door."
+    },
+    "qualite_client": {
+      "title": "Réception & qualité",
+      "desc": "Retour qualité client analysé par IA."
+    },
+    "finance": {
+      "title": "Finance & clôture",
+      "desc": "Statut de paiement, cohérence facture, litiges."
+    },
+    "portail_client": {
+      "title": "Portail client",
+      "desc": "Le client suit ses lots, docs, statuts et stats."
+    },
+    "hub_email": {
+      "title": "Hub email & IA",
+      "desc": "Emailing auto + import IA des pièces jointes."
+    },
+    "dashboard": {
+      "title": "Dashboard & KPIs",
+      "desc": "Filtres client/produit/pays/risque, taux de service."
+    },
+    "copilot": {
+      "title": "Copilot IA",
+      "desc": "Résumés de fils, génération de documents."
+    },
+    "alertes": {
+      "title": "Alertes",
+      "desc": "Retard, excursion température, document manquant."
+    }
+  },
+  "lotStatus": {
+    "booking": "Booking",
+    "chargement": "Chargement",
+    "transit": "En transit",
+    "arrive": "Arrivé",
+    "livre": "Livré",
+    "cloture": "Clôturé",
+    "rejete": "Rejeté"
+  },
+  "lotTable": {
+    "reference": "Lot",
+    "container": "Conteneur",
+    "client": "Client",
+    "product": "Produit",
+    "destination": "Destination",
+    "status": "Statut",
+    "risk": "Risque"
+  },
+  "footer": {
+    "built": "Fondations (Brique 0) — Next.js · Supabase · adaptateurs mock-first."
+  }
+}

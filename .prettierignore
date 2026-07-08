@@ -1,0 +1,10 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+src/lib/supabase/types.ts
+supabase/.branches
+supabase/.temp
+pnpm-lock.yaml
+package-lock.json

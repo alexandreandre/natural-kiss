@@ -1,0 +1,132 @@
+{
+  "app": {
+    "name": "Natural Kiss",
+    "tagline": "AI-augmented production-export tracking",
+    "shortName": "NK"
+  },
+  "nav": {
+    "home": "Home",
+    "lots": "Shipments",
+    "tracking": "Container tracking",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
+  },
+  "home": {
+    "heroKicker": "Platform",
+    "heroTitle": "The whole export flow, around one central object: the shipment",
+    "heroSubtitle": "From first customer contact to quality feedback and closing — every container tracked end to end.",
+    "modulesTitle": "Platform modules",
+    "modulesSubtitle": "Shipped brick by brick. Upcoming modules are visible but disabled.",
+    "recentLotsTitle": "Recent shipments",
+    "recentLotsSubtitle": "Live data read from Supabase.",
+    "viewAll": "View all shipments",
+    "noLots": "No shipments yet. Run “npm run db:reset” to seed the demo data.",
+    "dbError": "Database unreachable. Check .env.local and that Supabase is running."
+  },
+  "strate": {
+    "socle": "Permanent core",
+    "rail_client": "Customer rail",
+    "rail_lot": "Shipment rail",
+    "transverse": "Cross-cutting layers"
+  },
+  "module": {
+    "status": { "active": "Active", "soon": "Coming soon" },
+    "brique": "Brick {n}",
+    "referentiel": {
+      "title": "Master data",
+      "desc": "Single source: products, customers, sites, carriers."
+    },
+    "tracabilite_champ": {
+      "title": "Field traceability",
+      "desc": "Plot/harvest origin and stock (Cropwise)."
+    },
+    "coffre_certifs": {
+      "title": "Certification vault",
+      "desc": "GlobalG.A.P., GRASP, BRCGS… with expiry alerts."
+    },
+    "demande": {
+      "title": "Request & qualification",
+      "desc": "Incoming request, automatic certification matching."
+    },
+    "onboarding": {
+      "title": "Onboarding & specs",
+      "desc": "Qualified lead → active customer, space creation."
+    },
+    "commande_planning": {
+      "title": "Order & planning",
+      "desc": "Week-by-week planning, planned vs actual."
+    },
+    "booking": {
+      "title": "Booking",
+      "desc": "Booking the line arms the shipment file."
+    },
+    "chargement": {
+      "title": "Packing & loading",
+      "desc": "QR / photo at loading, product proof, datalogger."
+    },
+    "documents_gate": {
+      "title": "Documents & Gate",
+      "desc": "AI checker + “Check OK” lock before departure."
+    },
+    "tracking": {
+      "title": "Transport & tracking",
+      "desc": "A container's whole journey from its number."
+    },
+    "arrivee_douane": {
+      "title": "Arrival & customs",
+      "desc": "Clearance, CHED, door-to-door delivery."
+    },
+    "qualite_client": {
+      "title": "Reception & quality",
+      "desc": "Customer quality feedback analysed by AI."
+    },
+    "finance": {
+      "title": "Finance & closing",
+      "desc": "Payment status, invoice consistency, disputes."
+    },
+    "portail_client": {
+      "title": "Customer portal",
+      "desc": "Customers track their shipments, docs, stats."
+    },
+    "hub_email": {
+      "title": "Email & AI hub",
+      "desc": "Auto emailing + AI import of attachments."
+    },
+    "dashboard": {
+      "title": "Dashboard & KPIs",
+      "desc": "Filters by customer/product/country/risk."
+    },
+    "copilot": {
+      "title": "AI copilot",
+      "desc": "Thread summaries, document generation."
+    },
+    "alertes": {
+      "title": "Alerts",
+      "desc": "Delay, temperature excursion, missing document."
+    }
+  },
+  "lotStatus": {
+    "booking": "Booking",
+    "chargement": "Loading",
+    "transit": "In transit",
+    "arrive": "Arrived",
+    "livre": "Delivered",
+    "cloture": "Closed",
+    "rejete": "Rejected"
+  },
+  "lotTable": {
+    "reference": "Shipment",
+    "container": "Container",
+    "client": "Customer",
+    "product": "Product",
+    "destination": "Destination",
+    "status": "Status",
+    "risk": "Risk"
+  },
+  "footer": {
+    "built": "Foundations (Brick 0) — Next.js · Supabase · mock-first adapters."
+  }
+}
