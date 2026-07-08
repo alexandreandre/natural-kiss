@@ -16,7 +16,9 @@
     "db": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset && npm run seed",
+    "db:push": "supabase db push",
     "types": "supabase gen types typescript --local --schema public > src/lib/supabase/types.ts",
+    "types:cloud": "supabase gen types typescript --linked --schema public > src/lib/supabase/types.ts",
     "seed": "node scripts/seed-storage.mjs"
   },
   "dependencies": {
