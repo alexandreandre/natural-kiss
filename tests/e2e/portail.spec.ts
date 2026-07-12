@@ -154,3 +154,13 @@ test("isolation : un lot d'un autre client est inaccessible (RLS)", async ({
     page.getByText(/n'existe pas ou ne vous est pas accessible/),
   ).toBeVisible();
 });
+
+test("le client voit sa section « Vos documents » (onboarding)", async ({ page }) => {
+  await login(page, BARFOOTS_EMAIL);
+  await page.goto("/portail");
+  await expect(page).toHaveURL(/\/portail(\/)?$/);
+
+  await expect(page.getByRole("heading", { name: /Vos documents/ })).toBeVisible();
+  // Document seedé pour Barfoots (scripts/seed-onboarding-docs.mjs).
+  await expect(page.getByText(/Nos certifications/)).toBeVisible();
+});
