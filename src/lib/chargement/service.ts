@@ -46,7 +46,10 @@ export async function getPreuves(lotId: string): Promise<PreuveItem[]> {
     out.push({
       id: p.id,
       type: p.type,
-      nomFichier: preuveObjectKey(p.storage_path ?? "").split("/").pop() ?? "—",
+      nomFichier:
+        preuveObjectKey(p.storage_path ?? "")
+          .split("/")
+          .pop() ?? "—",
       priseLe: p.prise_le,
       visibleClient: p.visible_client,
       signedUrl,
@@ -82,7 +85,8 @@ export async function listChargementOverview(): Promise<ChargementOverviewRow[]>
     supabase.from("preuves_produit").select("lot_id, type, visible_client"),
   ]);
 
-  if (lots.error) throw new Error(`Lecture des lots impossible : ${lots.error.message}`);
+  if (lots.error)
+    throw new Error(`Lecture des lots impossible : ${lots.error.message}`);
   if (preuves.error)
     throw new Error(`Lecture des preuves impossible : ${preuves.error.message}`);
 

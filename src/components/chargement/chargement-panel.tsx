@@ -54,7 +54,10 @@ export async function ChargementPanel({
         ) : (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {preuves.map((p) => (
-              <li key={p.id} className="border-border overflow-hidden rounded-[4px] border">
+              <li
+                key={p.id}
+                className="border-border overflow-hidden rounded-[4px] border"
+              >
                 <div className="bg-muted/40 flex aspect-4/3 items-center justify-center">
                   {p.signedUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element

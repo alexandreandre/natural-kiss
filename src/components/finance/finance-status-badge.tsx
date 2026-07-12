@@ -26,7 +26,7 @@ export function PaiementStatusBadge({
         className,
       )}
     >
-      <span className="bg-current size-2 rounded-full" aria-hidden="true" />
+      <span className="size-2 rounded-full bg-current" aria-hidden="true" />
       {label}
     </span>
   );
@@ -55,7 +55,7 @@ export function FactureCoherenceBadge({
         className,
       )}
     >
-      <span className="bg-current size-2 rounded-full" aria-hidden="true" />
+      <span className="size-2 rounded-full bg-current" aria-hidden="true" />
       {label}
     </span>
   );

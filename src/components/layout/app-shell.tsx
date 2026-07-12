@@ -138,7 +138,10 @@ function NavList({
                 <span className="bg-primary absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-full" />
               )}
               <Icon
-                className={cn("relative size-[1.15rem] shrink-0", flow && "bg-sidebar rounded-full")}
+                className={cn(
+                  "relative size-[1.15rem] shrink-0",
+                  flow && "bg-sidebar rounded-full",
+                )}
                 strokeWidth={active ? 2 : 1.75}
               />
               {!collapsed && <span className="truncate">{item.label}</span>}

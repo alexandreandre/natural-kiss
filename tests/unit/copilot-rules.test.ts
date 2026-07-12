@@ -73,7 +73,9 @@ describe("summarizeThread", () => {
   });
 
   it("aucun mot-clé → aucune action suggérée", () => {
-    const thread = groupThreads([msg({ subject: "Bonjour", snippet: "Merci beaucoup." })])[0]!;
+    const thread = groupThreads([
+      msg({ subject: "Bonjour", snippet: "Merci beaucoup." }),
+    ])[0]!;
     expect(summarizeThread(thread).actions).toEqual([]);
   });
 });

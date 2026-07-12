@@ -1,7 +1,11 @@
 import "server-only";
 
 import { getBookingConfirmationProvider } from "@/lib/adapters";
-import { generateDossierText, nextLotReference, parseLotSeq } from "@/lib/booking/rules";
+import {
+  generateDossierText,
+  nextLotReference,
+  parseLotSeq,
+} from "@/lib/booking/rules";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
 
@@ -101,7 +105,8 @@ export async function listDemandesBooking(): Promise<DemandeBookingRow[]> {
     .select(DEMANDE_SELECT)
     .order("created_at", { ascending: false });
 
-  if (error) throw new Error(`Lecture des dossiers de booking impossible : ${error.message}`);
+  if (error)
+    throw new Error(`Lecture des dossiers de booking impossible : ${error.message}`);
   return (data ?? []).map((r) => mapDemande(r as DemandeBookingSelectRow));
 }
 
@@ -113,7 +118,8 @@ export async function getDemandeBooking(id: string): Promise<DemandeBookingRow |
     .eq("id", id)
     .maybeSingle();
 
-  if (error) throw new Error(`Lecture du dossier de booking impossible : ${error.message}`);
+  if (error)
+    throw new Error(`Lecture du dossier de booking impossible : ${error.message}`);
   return data ? mapDemande(data as DemandeBookingSelectRow) : null;
 }
 
@@ -183,7 +189,8 @@ export async function createDemandeBooking(
     .select(DEMANDE_SELECT)
     .single();
 
-  if (error) throw new Error(`Création du dossier de booking impossible : ${error.message}`);
+  if (error)
+    throw new Error(`Création du dossier de booking impossible : ${error.message}`);
   return mapDemande(data as DemandeBookingSelectRow);
 }
 
@@ -195,11 +202,16 @@ export async function markDemandeEnvoyee(
   const supabase = createAdminClient();
   const { error } = await supabase
     .from("demandes_booking")
-    .update({ statut: "envoye", envoyee_le: new Date().toISOString(), canal: canal ?? null })
+    .update({
+      statut: "envoye",
+      envoyee_le: new Date().toISOString(),
+      canal: canal ?? null,
+    })
     .eq("id", demandeId)
     .eq("statut", "brouillon");
 
-  if (error) throw new Error(`Mise à jour du dossier de booking impossible : ${error.message}`);
+  if (error)
+    throw new Error(`Mise à jour du dossier de booking impossible : ${error.message}`);
 }
 
 /** Pré-remplissage du formulaire de confirmation depuis un mail collé (IA, tout canal). */
@@ -218,7 +230,8 @@ async function resolveTransporteur(
     .select("id")
     .ilike("nom", trimmed)
     .maybeSingle();
-  if (findErr) throw new Error(`Recherche du transporteur impossible : ${findErr.message}`);
+  if (findErr)
+    throw new Error(`Recherche du transporteur impossible : ${findErr.message}`);
   if (existing) return existing.id;
 
   // Transporteur inconnu du référentiel (M0) : on l'y ajoute — le canal de
@@ -228,7 +241,8 @@ async function resolveTransporteur(
     .insert({ nom: trimmed, mode })
     .select("id")
     .single();
-  if (insertErr) throw new Error(`Création du transporteur impossible : ${insertErr.message}`);
+  if (insertErr)
+    throw new Error(`Création du transporteur impossible : ${insertErr.message}`);
   return created.id;
 }
 
@@ -240,7 +254,8 @@ async function nextLotReferenceForToday(
     .from("lots")
     .select("reference")
     .like("reference", `LOT-${year}-%`);
-  if (error) throw new Error(`Lecture des références de lot impossible : ${error.message}`);
+  if (error)
+    throw new Error(`Lecture des références de lot impossible : ${error.message}`);
 
   const lastSeq = (data ?? []).reduce(
     (max, row) => Math.max(max, parseLotSeq(row.reference, year)),
@@ -273,8 +288,7 @@ export interface ConfirmBookingDirectInput {
 }
 
 export type ConfirmBookingInput =
-  | ConfirmBookingFromDemandeInput
-  | ConfirmBookingDirectInput;
+  ConfirmBookingFromDemandeInput | ConfirmBookingDirectInput;
 
 export interface ConfirmBookingResult {
   lotId: string;
@@ -309,8 +323,10 @@ export async function confirmBooking(
       )
       .eq("id", input.demandeId)
       .maybeSingle();
-    if (error) throw new Error(`Lecture du dossier de booking impossible : ${error.message}`);
-    if (!demande) throw new Error(`Dossier de booking introuvable : ${input.demandeId}`);
+    if (error)
+      throw new Error(`Lecture du dossier de booking impossible : ${error.message}`);
+    if (!demande)
+      throw new Error(`Dossier de booking introuvable : ${input.demandeId}`);
 
     // Idempotence : déjà confirmé → on renvoie le lot existant sans en recréer un.
     if (demande.lot_id && demande.lot) {
@@ -335,7 +351,11 @@ export async function confirmBooking(
     commandeId = direct.commandeId ?? null;
   }
 
-  const transporteurId = await resolveTransporteur(supabase, input.transporteurNom, mode);
+  const transporteurId = await resolveTransporteur(
+    supabase,
+    input.transporteurNom,
+    mode,
+  );
   const reference = await nextLotReferenceForToday(supabase);
 
   const { data: lot, error: lotErr } = await supabase
@@ -365,7 +385,9 @@ export async function confirmBooking(
       .update({ statut: "confirme", lot_id: lot.id })
       .eq("id", input.demandeId);
     if (updateErr) {
-      throw new Error(`Mise à jour du dossier de booking impossible : ${updateErr.message}`);
+      throw new Error(
+        `Mise à jour du dossier de booking impossible : ${updateErr.message}`,
+      );
     }
   }
 

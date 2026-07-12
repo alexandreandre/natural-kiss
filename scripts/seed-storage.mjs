@@ -67,9 +67,24 @@ const PLACEHOLDER_PNG = Buffer.from(
 
 /** @type {{ bucket: string, dest: string, contentType: string, bytes: Buffer }[]} */
 const INLINE_FILES = [
-  { bucket: "preuves", dest: "LOT-2026-0003/boite.jpg", contentType: "image/png", bytes: PLACEHOLDER_PNG },
-  { bucket: "preuves", dest: "LOT-2026-0003/qr-charg.png", contentType: "image/png", bytes: PLACEHOLDER_PNG },
-  { bucket: "preuves", dest: "LOT-2026-0001/boite.jpg", contentType: "image/png", bytes: PLACEHOLDER_PNG },
+  {
+    bucket: "preuves",
+    dest: "LOT-2026-0003/boite.jpg",
+    contentType: "image/png",
+    bytes: PLACEHOLDER_PNG,
+  },
+  {
+    bucket: "preuves",
+    dest: "LOT-2026-0003/qr-charg.png",
+    contentType: "image/png",
+    bytes: PLACEHOLDER_PNG,
+  },
+  {
+    bucket: "preuves",
+    dest: "LOT-2026-0001/boite.jpg",
+    contentType: "image/png",
+    bytes: PLACEHOLDER_PNG,
+  },
 ];
 
 const supabase = createClient(url, serviceKey, {

@@ -96,7 +96,9 @@ export interface MissingDocInput {
 }
 
 /** Document manquant au dossier d'expédition (checklist Gate, M6). */
-export function detectMissingDocumentAlert(input: MissingDocInput): AlerteCandidate | null {
+export function detectMissingDocumentAlert(
+  input: MissingDocInput,
+): AlerteCandidate | null {
   if (input.missing.length === 0) return null;
   return {
     type: "document_manquant",
@@ -112,7 +114,9 @@ export interface QuarantineInput {
 }
 
 /** Risque de quarantaine douanière (organismes de quarantaine non couverts). */
-export function detectQuarantineRiskAlert(input: QuarantineInput): AlerteCandidate | null {
+export function detectQuarantineRiskAlert(
+  input: QuarantineInput,
+): AlerteCandidate | null {
   if (input.failingRules.length === 0) return null;
   return {
     type: "risque_quarantaine",

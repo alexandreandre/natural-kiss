@@ -60,7 +60,10 @@ export default async function AlertesOverviewPage() {
                       {r.clientNom ? ` · ${r.clientNom}` : ""} · {r.message}
                     </p>
                   </div>
-                  <AlerteSeverityBadge severite={r.severite} label={t(`alertes.severite.${r.severite}`)} />
+                  <AlerteSeverityBadge
+                    severite={r.severite}
+                    label={t(`alertes.severite.${r.severite}`)}
+                  />
                 </Link>
               </li>
             ))}

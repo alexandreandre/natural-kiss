@@ -40,7 +40,12 @@ export async function syncLotOrigin(lotId: string): Promise<void> {
 
 export interface SiteOverviewRow {
   site: string;
-  lots: { lotId: string; reference: string; produit: string; parcelle: string | null }[];
+  lots: {
+    lotId: string;
+    reference: string;
+    produit: string;
+    parcelle: string | null;
+  }[];
 }
 
 /** Vue multi-sites (M0b) : lots regroupés par site de production. */

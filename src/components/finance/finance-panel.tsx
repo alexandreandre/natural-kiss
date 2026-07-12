@@ -23,7 +23,13 @@ const FIELD =
   "border-border bg-background focus-visible:ring-ring/50 h-9 w-full rounded-[var(--radius)] border px-3 text-sm outline-none focus-visible:ring-[3px]";
 const LABEL = "text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase";
 
-const PAIEMENT_STATUTS = ["a_venir", "en_attente", "partiel", "paye", "litige"] as const;
+const PAIEMENT_STATUTS = [
+  "a_venir",
+  "en_attente",
+  "partiel",
+  "paye",
+  "litige",
+] as const;
 const LITIGE_TYPES = [
   "facture_contestee",
   "sous_evaluation_douaniere",
@@ -49,7 +55,8 @@ export function FinancePanel({ lotId, data }: { lotId: string; data: LotFinanceD
   const [echeance, setEcheance] = useState(data.paiement.echeance ?? "");
 
   const [litigeOpen, setLitigeOpen] = useState(false);
-  const [litigeType, setLitigeType] = useState<(typeof LITIGE_TYPES)[number]>("facture_contestee");
+  const [litigeType, setLitigeType] =
+    useState<(typeof LITIGE_TYPES)[number]>("facture_contestee");
   const [litigeDesc, setLitigeDesc] = useState("");
   const [litigeMontant, setLitigeMontant] = useState("");
 
@@ -64,7 +71,10 @@ export function FinancePanel({ lotId, data }: { lotId: string; data: LotFinanceD
               {t("payment.title")}
             </p>
             <div className="mt-3">
-              <PaiementStatusBadge statut={data.paiement.statut} label={t(`payment.status.${data.paiement.statut}`)} />
+              <PaiementStatusBadge
+                statut={data.paiement.statut}
+                label={t(`payment.status.${data.paiement.statut}`)}
+              />
             </div>
           </div>
           <FactureCoherenceBadge
@@ -208,7 +218,9 @@ export function FinancePanel({ lotId, data }: { lotId: string; data: LotFinanceD
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="text-destructive size-4 shrink-0" />
-                    <p className="text-sm font-medium">{t(`litiges.types.${l.type}`)}</p>
+                    <p className="text-sm font-medium">
+                      {t(`litiges.types.${l.type}`)}
+                    </p>
                     <span className="text-muted-foreground/70 font-mono text-[11px]">
                       {t(`litiges.statut.${l.statut}`)}
                     </span>
@@ -220,7 +232,12 @@ export function FinancePanel({ lotId, data }: { lotId: string; data: LotFinanceD
                       disabled={pending}
                       onClick={() =>
                         startTransition(async () => {
-                          await updateLitigeStatutAction(lotId, l.id, "resolu", t("litiges.resolvedNote"));
+                          await updateLitigeStatutAction(
+                            lotId,
+                            l.id,
+                            "resolu",
+                            t("litiges.resolvedNote"),
+                          );
                           router.refresh();
                         })
                       }
@@ -264,7 +281,10 @@ export function FinancePanel({ lotId, data }: { lotId: string; data: LotFinanceD
         ) : (
           <ul className="divide-border/60 border-border divide-y rounded-[4px] border">
             {data.certificatsDestruction.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-4 px-4 py-3">
+              <li
+                key={c.id}
+                className="flex items-center justify-between gap-4 px-4 py-3"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{c.motif}</p>
                   <p className="text-muted-foreground/70 font-mono text-[11px]">

@@ -96,22 +96,22 @@ Aucun changement de code : seule la configuration diffère.
 
 ## Scripts npm
 
-| Script                                  | Rôle                                                              |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `npm run dev`                           | Serveur de dev Next.js                                            |
-| `npm run build` / `start`               | Build & serveur de production                                     |
-| `npm run db`                            | `supabase start` (Supabase local)                                 |
-| `npm run db:reset`                      | `supabase db reset` (migrations + seed) puis `npm run seed`       |
-| `npm run db:push`                       | `supabase db push` (applique les migrations sur le **cloud** lié) |
-| `npm run types`                         | Génère les types TS depuis le schéma **local**                    |
-| `npm run types:cloud`                   | Génère les types TS depuis le schéma **cloud** lié                |
+| Script                                  | Rôle                                                                               |
+| --------------------------------------- | ---------------------------------------------------------------------------------- |
+| `npm run dev`                           | Serveur de dev Next.js                                                             |
+| `npm run build` / `start`               | Build & serveur de production                                                      |
+| `npm run db`                            | `supabase start` (Supabase local)                                                  |
+| `npm run db:reset`                      | `supabase db reset` (migrations + seed) puis `npm run seed`                        |
+| `npm run db:push`                       | `supabase db push` (applique les migrations sur le **cloud** lié)                  |
+| `npm run types`                         | Génère les types TS depuis le schéma **local**                                     |
+| `npm run types:cloud`                   | Génère les types TS depuis le schéma **cloud** lié                                 |
 | `npm run seed`                          | Pousse les fichiers de démo dans Storage + top-ups (portail, planning, onboarding) |
-| `node scripts/seed-gate.mjs`            | Top-up idempotent des données de démo Gate (cloud, service role)  |
-| `node scripts/seed-onboarding.mjs`      | Top-up idempotent du coffre certifs + demande démo (Brique 7)     |
-| `node scripts/seed-booking.mjs`         | Top-up idempotent des dossiers de réservation démo (Brique 9)     |
-| `npm run lint` / `typecheck` / `format` | Qualité                                                           |
-| `npm test`                              | Tests unitaires + intégration (Vitest, Supabase local)            |
-| `npm run test:e2e`                      | Test E2E (Playwright)                                             |
+| `node scripts/seed-gate.mjs`            | Top-up idempotent des données de démo Gate (cloud, service role)                   |
+| `node scripts/seed-onboarding.mjs`      | Top-up idempotent du coffre certifs + demande démo (Brique 7)                      |
+| `node scripts/seed-booking.mjs`         | Top-up idempotent des dossiers de réservation démo (Brique 9)                      |
+| `npm run lint` / `typecheck` / `format` | Qualité                                                                            |
+| `npm test`                              | Tests unitaires + intégration (Vitest, Supabase local)                             |
+| `npm run test:e2e`                      | Test E2E (Playwright)                                                              |
 
 ## Architecture (Brique 0)
 

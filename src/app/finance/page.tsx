@@ -16,7 +16,9 @@ export default async function FinanceOverviewPage() {
   const rows = await listFinanceOverview();
 
   const order = { litige: 0, en_attente: 1, partiel: 2, a_venir: 3, paye: 4 } as const;
-  const sorted = [...rows].sort((a, b) => order[a.paiementStatut] - order[b.paiementStatut]);
+  const sorted = [...rows].sort(
+    (a, b) => order[a.paiementStatut] - order[b.paiementStatut],
+  );
 
   return (
     <div>

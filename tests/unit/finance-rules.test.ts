@@ -13,10 +13,7 @@ describe("computeFactureCoherence", () => {
 
   it("vérification lancée sans anomalie facture → cohérente", () => {
     expect(
-      computeFactureCoherence(
-        [{ valeurs: { sources: ["bl", "packing_list"] } }],
-        true,
-      ),
+      computeFactureCoherence([{ valeurs: { sources: ["bl", "packing_list"] } }], true),
     ).toBe("coherente");
   });
 
@@ -38,7 +35,9 @@ describe("isLitigeBlocking", () => {
 
 describe("effectivePaymentStatus", () => {
   it("un litige non résolu prime sur le statut déclaré (cas Voltz)", () => {
-    expect(effectivePaymentStatus("en_attente", [{ statut: "en_cours" }])).toBe("litige");
+    expect(effectivePaymentStatus("en_attente", [{ statut: "en_cours" }])).toBe(
+      "litige",
+    );
   });
 
   it("sans litige bloquant, le statut déclaré est conservé", () => {

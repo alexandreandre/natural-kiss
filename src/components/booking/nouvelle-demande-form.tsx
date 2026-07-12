@@ -68,7 +68,13 @@ export function NouvelleDemandeForm({ clients }: { clients: ClientOption[] }) {
           <label htmlFor="quantite" className={LABEL}>
             {t("quantite")}
           </label>
-          <input id="quantite" name="quantite" type="number" step="any" className={FIELD} />
+          <input
+            id="quantite"
+            name="quantite"
+            type="number"
+            step="any"
+            className={FIELD}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="unite" className={LABEL}>
@@ -82,7 +88,12 @@ export function NouvelleDemandeForm({ clients }: { clients: ClientOption[] }) {
         <label htmlFor="incoterm" className={LABEL}>
           {t("incoterm")}
         </label>
-        <input id="incoterm" name="incoterm" placeholder="DAP / FOB / FCA…" className={FIELD} />
+        <input
+          id="incoterm"
+          name="incoterm"
+          placeholder="DAP / FOB / FCA…"
+          className={FIELD}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -121,7 +132,11 @@ export function NouvelleDemandeForm({ clients }: { clients: ClientOption[] }) {
 
       <div className="flex items-center gap-3 sm:col-span-2">
         <Button type="submit" disabled={pending}>
-          {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
           {t("submit")}
         </Button>
 

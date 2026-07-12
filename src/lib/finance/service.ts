@@ -39,7 +39,8 @@ export async function listFinanceOverview(): Promise<FinanceOverviewRow[]> {
     supabase.from("conformite_checks").select("lot_id"),
   ]);
 
-  if (lots.error) throw new Error(`Lecture des lots impossible : ${lots.error.message}`);
+  if (lots.error)
+    throw new Error(`Lecture des lots impossible : ${lots.error.message}`);
   if (paiements.error)
     throw new Error(`Lecture des paiements impossible : ${paiements.error.message}`);
   if (litiges.error)
@@ -47,7 +48,9 @@ export async function listFinanceOverview(): Promise<FinanceOverviewRow[]> {
   if (anomalies.error)
     throw new Error(`Lecture des anomalies impossible : ${anomalies.error.message}`);
   if (conformite.error)
-    throw new Error(`Lecture de la conformité impossible : ${conformite.error.message}`);
+    throw new Error(
+      `Lecture de la conformité impossible : ${conformite.error.message}`,
+    );
 
   const paiementByLot = new Map(
     (paiements.data ?? []).map((p) => [
@@ -61,7 +64,10 @@ export async function listFinanceOverview(): Promise<FinanceOverviewRow[]> {
     arr.push(l.statut as LitigeStatut);
     litigesByLot.set(l.lot_id, arr);
   }
-  const anomaliesByLot = new Map<string, { valeurs: { sources?: string[] | null } }[]>();
+  const anomaliesByLot = new Map<
+    string,
+    { valeurs: { sources?: string[] | null } }[]
+  >();
   for (const a of anomalies.data ?? []) {
     const arr = anomaliesByLot.get(a.lot_id) ?? [];
     arr.push({ valeurs: (a.valeurs ?? {}) as { sources?: string[] | null } });
@@ -84,8 +90,9 @@ export async function listFinanceOverview(): Promise<FinanceOverviewRow[]> {
       paiementStatut: effectivePaymentStatus(paiement.statut, litigesStatuts),
       montant: paiement.montant,
       devise: paiement.devise,
-      litigesOuverts: litigesStatuts.filter((l) => l.statut === "ouvert" || l.statut === "en_cours")
-        .length,
+      litigesOuverts: litigesStatuts.filter(
+        (l) => l.statut === "ouvert" || l.statut === "en_cours",
+      ).length,
       factureCoherence: computeFactureCoherence(
         (anomaliesByLot.get(l.id) ?? []).map((a) => ({
           valeurs: { sources: a.valeurs.sources ?? [] },
@@ -142,7 +149,9 @@ export async function getLotFinance(lotId: string): Promise<LotFinanceData> {
       .maybeSingle(),
     supabase
       .from("litiges")
-      .select("id, type, statut, montant_conteste, devise, description, resolution, ouvert_le, resolu_le")
+      .select(
+        "id, type, statut, montant_conteste, devise, description, resolution, ouvert_le, resolu_le",
+      )
       .eq("lot_id", lotId)
       .order("ouvert_le", { ascending: false }),
     supabase
@@ -162,11 +171,15 @@ export async function getLotFinance(lotId: string): Promise<LotFinanceData> {
   if (litiges.error)
     throw new Error(`Lecture des litiges impossible : ${litiges.error.message}`);
   if (certificats.error)
-    throw new Error(`Lecture des certificats impossible : ${certificats.error.message}`);
+    throw new Error(
+      `Lecture des certificats impossible : ${certificats.error.message}`,
+    );
   if (anomalies.error)
     throw new Error(`Lecture des anomalies impossible : ${anomalies.error.message}`);
   if (conformite.error)
-    throw new Error(`Lecture de la conformité impossible : ${conformite.error.message}`);
+    throw new Error(
+      `Lecture de la conformité impossible : ${conformite.error.message}`,
+    );
 
   const litigesRows: LitigeRow[] = (litiges.data ?? []).map((l) => ({
     id: l.id,
@@ -202,7 +215,9 @@ export async function getLotFinance(lotId: string): Promise<LotFinanceData> {
     })),
     factureCoherence: computeFactureCoherence(
       (anomalies.data ?? []).map((a) => ({
-        valeurs: { sources: (a.valeurs as { sources?: string[] } | null)?.sources ?? [] },
+        valeurs: {
+          sources: (a.valeurs as { sources?: string[] } | null)?.sources ?? [],
+        },
       })),
       (conformite.count ?? 0) > 0,
     ),
@@ -218,7 +233,10 @@ export interface UpsertPaiementInput {
 }
 
 /** Met à jour (ou crée) le statut de paiement d'un lot. */
-export async function upsertPaiement(lotId: string, input: UpsertPaiementInput): Promise<void> {
+export async function upsertPaiement(
+  lotId: string,
+  input: UpsertPaiementInput,
+): Promise<void> {
   const supabase = createAdminClient();
   const { error } = await supabase.from("paiements").upsert(
     {
@@ -241,7 +259,10 @@ export interface CreateLitigeInput {
 }
 
 /** Ouvre un litige sur un lot (cas type Voltz : facture contestée). */
-export async function createLitige(lotId: string, input: CreateLitigeInput): Promise<void> {
+export async function createLitige(
+  lotId: string,
+  input: CreateLitigeInput,
+): Promise<void> {
   const supabase = createAdminClient();
   const { error } = await supabase.from("litiges").insert({
     lot_id: lotId,
@@ -264,7 +285,10 @@ export async function updateLitigeStatut(
     .update({
       statut,
       resolution: resolution ?? null,
-      resolu_le: statut === "resolu" || statut === "clos" ? new Date().toISOString().slice(0, 10) : null,
+      resolu_le:
+        statut === "resolu" || statut === "clos"
+          ? new Date().toISOString().slice(0, 10)
+          : null,
     })
     .eq("id", litigeId);
   if (error) throw new Error(`Mise à jour du litige impossible : ${error.message}`);

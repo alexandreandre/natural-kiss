@@ -21,7 +21,10 @@ const ALL_TYPES: AlerteType[] = [
   "risque_quarantaine",
 ];
 
-const QUARANTINE_RULES = new Set(["declaration_additionnelle_ue", "reglement_2021_2285"]);
+const QUARANTINE_RULES = new Set([
+  "declaration_additionnelle_ue",
+  "reglement_2021_2285",
+]);
 
 /**
  * Scanne un lot : recalcule les 4 familles d'alertes (retard, excursion,
@@ -34,7 +37,9 @@ export async function runAlertScan(lotId: string): Promise<AlerteCandidate[]> {
 
   const { data: lot, error: lotErr } = await supabase
     .from("lots")
-    .select("id, reference, numero_conteneur, statut, date_arrivee_prevue, date_arrivee_reelle, temperature_consigne_c")
+    .select(
+      "id, reference, numero_conteneur, statut, date_arrivee_prevue, date_arrivee_reelle, temperature_consigne_c",
+    )
     .eq("id", lotId)
     .maybeSingle();
   if (lotErr) throw new Error(`Lecture du lot impossible : ${lotErr.message}`);
@@ -45,7 +50,10 @@ export async function runAlertScan(lotId: string): Promise<AlerteCandidate[]> {
   const [readings, docRows, conformiteRows] = await Promise.all([
     getSensorProvider().getSeries(ref),
     supabase.from("documents").select("type").eq("lot_id", lotId),
-    supabase.from("conformite_checks").select("regle, libelle, statut").eq("lot_id", lotId),
+    supabase
+      .from("conformite_checks")
+      .select("regle, libelle, statut")
+      .eq("lot_id", lotId),
   ]);
   if (docRows.error)
     throw new Error(`Lecture des documents impossible : ${docRows.error.message}`);
@@ -59,7 +67,9 @@ export async function runAlertScan(lotId: string): Promise<AlerteCandidate[]> {
   const missing = REQUIRED_DOC_TYPES.filter((t) => !presentTypes.has(t));
 
   const failingQuarantineRules = (conformiteRows.data ?? []).filter(
-    (c) => QUARANTINE_RULES.has(c.regle) && (c.statut === "manquant" || c.statut === "non_conforme"),
+    (c) =>
+      QUARANTINE_RULES.has(c.regle) &&
+      (c.statut === "manquant" || c.statut === "non_conforme"),
   );
 
   const candidates: AlerteCandidate[] = [
@@ -74,7 +84,10 @@ export async function runAlertScan(lotId: string): Promise<AlerteCandidate[]> {
     }),
     detectMissingDocumentAlert({ missing }),
     detectQuarantineRiskAlert({
-      failingRules: failingQuarantineRules.map((r) => ({ regle: r.regle, libelle: r.libelle })),
+      failingRules: failingQuarantineRules.map((r) => ({
+        regle: r.regle,
+        libelle: r.libelle,
+      })),
     }),
   ].filter((c): c is AlerteCandidate => c !== null);
 
@@ -104,7 +117,8 @@ export async function runAlertScan(lotId: string): Promise<AlerteCandidate[]> {
         .eq("lot_id", lotId)
         .eq("type", type)
         .eq("statut", "active");
-      if (error) throw new Error(`Résolution de l'alerte impossible : ${error.message}`);
+      if (error)
+        throw new Error(`Résolution de l'alerte impossible : ${error.message}`);
     }
   }
 
@@ -140,14 +154,20 @@ export interface AlerteOverviewRow {
   detecteeLe: string;
 }
 
-const SEVERITY_ORDER: Record<AlerteSeverite, number> = { critique: 0, avertissement: 1, info: 2 };
+const SEVERITY_ORDER: Record<AlerteSeverite, number> = {
+  critique: 0,
+  avertissement: 1,
+  info: 2,
+};
 
 /** Alertes actives, tous lots confondus (page d'aperçu /alertes). */
 export async function listActiveAlertes(): Promise<AlerteOverviewRow[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("alertes")
-    .select("id, type, severite, statut, message, detectee_le, lot:lots(id, reference, produit, client:clients(nom))")
+    .select(
+      "id, type, severite, statut, message, detectee_le, lot:lots(id, reference, produit, client:clients(nom))",
+    )
     .eq("statut", "active");
   if (error) throw new Error(`Lecture des alertes impossible : ${error.message}`);
 
@@ -180,7 +200,9 @@ export async function getLotAlertes(lotId: string): Promise<AlerteOverviewRow[]>
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("alertes")
-    .select("id, type, severite, statut, message, detectee_le, lot:lots(id, reference, produit)")
+    .select(
+      "id, type, severite, statut, message, detectee_le, lot:lots(id, reference, produit)",
+    )
     .eq("lot_id", lotId)
     .order("detectee_le", { ascending: false });
   if (error) throw new Error(`Lecture des alertes impossible : ${error.message}`);

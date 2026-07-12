@@ -17,7 +17,9 @@ test("lot Bimi RoRo « fatigué » → excursion température détectée par le 
   await expect(panel.getByText(/Excursion de température/).first()).toBeVisible();
 });
 
-test("origine champ : site de production visible sur la fiche lot", async ({ page }) => {
+test("origine champ : site de production visible sur la fiche lot", async ({
+  page,
+}) => {
   await page.goto("/lots");
   await page.getByRole("link", { name: "LOT-2026-0005" }).click();
 
@@ -36,7 +38,10 @@ test("finance : le lot Voltz (slips) apparaît en litige", async ({ page }) => {
 
 test("copilot : résumé du fil Voltz + actions suggérées", async ({ page }) => {
   await page.goto("/copilot");
-  await page.getByText(/Voltz \(OTPU6220580\)/i).first().click();
+  await page
+    .getByText(/Voltz \(OTPU6220580\)/i)
+    .first()
+    .click();
   await page.getByRole("button", { name: /Résumer le fil/ }).click();
 
   await expect(page.getByText(/Résumé/)).toBeVisible();

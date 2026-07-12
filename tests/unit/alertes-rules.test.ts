@@ -10,7 +10,11 @@ import {
 describe("detectDelayAlert", () => {
   it("aucune alerte sans date d'arrivée prévue", () => {
     expect(
-      detectDelayAlert({ statut: "transit", dateArriveePrevue: null, dateArriveeReelle: null }),
+      detectDelayAlert({
+        statut: "transit",
+        dateArriveePrevue: null,
+        dateArriveeReelle: null,
+      }),
     ).toBeNull();
   });
 
@@ -63,7 +67,9 @@ describe("detectDelayAlert", () => {
 
 describe("detectExcursionAlert", () => {
   it("aucune consigne / aucun relevé → pas d'alerte", () => {
-    expect(detectExcursionAlert({ targetTempC: null, readings: [{ tempC: 20 }] })).toBeNull();
+    expect(
+      detectExcursionAlert({ targetTempC: null, readings: [{ tempC: 20 }] }),
+    ).toBeNull();
     expect(detectExcursionAlert({ targetTempC: 6, readings: [] })).toBeNull();
   });
 
@@ -77,7 +83,9 @@ describe("detectExcursionAlert", () => {
   });
 
   it("excursion marquée (lot Bimi RoRo 'fatigué', consigne -0.5°C) → critique", () => {
-    const readings = Array.from({ length: 10 }, (_, i) => ({ tempC: i < 5 ? -0.6 : 9 }));
+    const readings = Array.from({ length: 10 }, (_, i) => ({
+      tempC: i < 5 ? -0.6 : 9,
+    }));
     const alert = detectExcursionAlert({ targetTempC: -0.5, readings });
     expect(alert).not.toBeNull();
     expect(alert?.type).toBe("excursion_temperature");
@@ -105,7 +113,10 @@ describe("detectQuarantineRiskAlert", () => {
   it("Déclaration Additionnelle manquante (cas slips Voltz) → alerte critique", () => {
     const alert = detectQuarantineRiskAlert({
       failingRules: [
-        { regle: "declaration_additionnelle_ue", libelle: "Déclaration Additionnelle UE" },
+        {
+          regle: "declaration_additionnelle_ue",
+          libelle: "Déclaration Additionnelle UE",
+        },
       ],
     });
     expect(alert?.type).toBe("risque_quarantaine");

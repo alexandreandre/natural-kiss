@@ -6,7 +6,10 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { generateDocumentAction, summarizeThreadAction } from "@/lib/copilot/actions";
-import type { GenerateDocumentResult, ThreadSummaryResult } from "@/lib/copilot/service";
+import type {
+  GenerateDocumentResult,
+  ThreadSummaryResult,
+} from "@/lib/copilot/service";
 import type { ThreadListItem } from "@/lib/copilot/service";
 import { cn } from "@/lib/utils";
 

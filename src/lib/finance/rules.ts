@@ -19,7 +19,9 @@ export function computeFactureCoherence(
   gateHasRun: boolean,
 ): FactureCoherence {
   if (!gateHasRun) return "inconnue";
-  const touchesFacture = anomalies.some((a) => (a.valeurs.sources ?? []).includes("facture"));
+  const touchesFacture = anomalies.some((a) =>
+    (a.valeurs.sources ?? []).includes("facture"),
+  );
   return touchesFacture ? "incoherente" : "coherente";
 }
 

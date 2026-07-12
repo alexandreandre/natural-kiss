@@ -101,7 +101,9 @@ const DEMANDES = [
 
 let count = 0;
 for (const d of DEMANDES) {
-  const { error } = await supabase.from("demandes_booking").upsert(d, { onConflict: "id" });
+  const { error } = await supabase
+    .from("demandes_booking")
+    .upsert(d, { onConflict: "id" });
   if (error) throw error;
   count += 1;
 }

@@ -73,7 +73,10 @@ export default async function PortailLotDetailPage({
             <h1 className="font-display mt-1.5 text-2xl leading-tight font-medium tracking-tight sm:text-3xl">
               {lot.produit}
               {lot.variete ? (
-                <span className="text-muted-foreground font-normal"> · {lot.variete}</span>
+                <span className="text-muted-foreground font-normal">
+                  {" "}
+                  · {lot.variete}
+                </span>
               ) : null}
             </h1>
             <p className="text-muted-foreground mt-2 flex items-center gap-2 text-sm">
@@ -102,9 +105,13 @@ export default async function PortailLotDetailPage({
           </Field>
           <Field label={t("portail.detail.arrival")}>
             {lot.dateArriveeReelle
-              ? format.dateTime(new Date(lot.dateArriveeReelle), { dateStyle: "medium" })
+              ? format.dateTime(new Date(lot.dateArriveeReelle), {
+                  dateStyle: "medium",
+                })
               : lot.dateArriveePrevue
-                ? format.dateTime(new Date(lot.dateArriveePrevue), { dateStyle: "medium" })
+                ? format.dateTime(new Date(lot.dateArriveePrevue), {
+                    dateStyle: "medium",
+                  })
                 : "—"}
           </Field>
         </div>
@@ -120,7 +127,10 @@ export default async function PortailLotDetailPage({
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {photos.map((p) => (
-              <div key={p.id} className="border-border overflow-hidden rounded-[4px] border">
+              <div
+                key={p.id}
+                className="border-border overflow-hidden rounded-[4px] border"
+              >
                 <div className="bg-muted/40 flex aspect-4/3 items-center justify-center">
                   {p.signedUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -180,7 +190,9 @@ export default async function PortailLotDetailPage({
                         })}
                       </time>
                     </div>
-                    <p className="text-muted-foreground mt-0.5 text-[13px]">{e.label}</p>
+                    <p className="text-muted-foreground mt-0.5 text-[13px]">
+                      {e.label}
+                    </p>
                     {e.lieu && (
                       <p className="text-muted-foreground/70 mt-1 flex items-center gap-1 text-xs">
                         <MapPin className="size-3" />

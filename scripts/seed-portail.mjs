@@ -34,8 +34,14 @@ const DEMO_PASSWORD = process.env.PORTAIL_DEMO_PASSWORD ?? "NaturalKiss!Demo2026
 //   • Barfoots (b…0001) : lots Bimi 2 & 3 (photo boîte visible sur le lot 3) ;
 //   • Graines Voltz (b…0003) : lot slips 4.
 const MAPPINGS = [
-  { email: "portail-barfoots@demo.natural-kiss.com", clientId: "b0000000-0000-4000-8000-000000000001" },
-  { email: "portail-voltz@demo.natural-kiss.com", clientId: "b0000000-0000-4000-8000-000000000003" },
+  {
+    email: "portail-barfoots@demo.natural-kiss.com",
+    clientId: "b0000000-0000-4000-8000-000000000001",
+  },
+  {
+    email: "portail-voltz@demo.natural-kiss.com",
+    clientId: "b0000000-0000-4000-8000-000000000003",
+  },
 ];
 
 const supabase = createClient(url, serviceKey, {
@@ -47,7 +53,9 @@ async function findUserByEmail(email) {
   for (let page = 1; page <= 20; page++) {
     const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
     if (error) throw new Error(`listUsers: ${error.message}`);
-    const found = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    const found = data.users.find(
+      (u) => u.email?.toLowerCase() === email.toLowerCase(),
+    );
     if (found) return found;
     if (data.users.length < 200) return null;
   }
@@ -80,7 +88,10 @@ for (const { email, clientId } of MAPPINGS) {
 
   const { error: linkErr } = await supabase
     .from("client_users")
-    .upsert({ client_id: clientId, user_id: user.id }, { onConflict: "client_id,user_id" });
+    .upsert(
+      { client_id: clientId, user_id: user.id },
+      { onConflict: "client_id,user_id" },
+    );
 
   if (linkErr) {
     console.error(`[seed-portail] liaison ${email} échouée : ${linkErr.message}`);

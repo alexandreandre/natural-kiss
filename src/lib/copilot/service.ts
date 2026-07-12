@@ -29,7 +29,8 @@ export async function listThreads(): Promise<ThreadListItem[]> {
     getEmailProvider().listInbox(),
     supabase.from("lots").select("id, reference, numero_conteneur"),
   ]);
-  if (lots.error) throw new Error(`Lecture des lots impossible : ${lots.error.message}`);
+  if (lots.error)
+    throw new Error(`Lecture des lots impossible : ${lots.error.message}`);
 
   const lotRefs: LotRef[] = (lots.data ?? []).map((l) => ({
     id: l.id,
@@ -71,7 +72,9 @@ export interface ThreadSummaryResult {
  * au `LlmProvider` sert uniquement à l'attribution du modèle (mock → réel,
  * sans changer la logique consommatrice).
  */
-export async function summarizeEmailThread(threadKey: string): Promise<ThreadSummaryResult | null> {
+export async function summarizeEmailThread(
+  threadKey: string,
+): Promise<ThreadSummaryResult | null> {
   const thread = await getThread(threadKey);
   if (!thread) return null;
 
@@ -101,7 +104,9 @@ export async function generateDocument(
   const supabase = createAdminClient();
   const { data: lot, error } = await supabase
     .from("lots")
-    .select("reference, produit, variete, numero_conteneur, destination_pays, client:clients(nom)")
+    .select(
+      "reference, produit, variete, numero_conteneur, destination_pays, client:clients(nom)",
+    )
     .eq("id", lotId)
     .maybeSingle();
   if (error) throw new Error(`Lecture du lot impossible : ${error.message}`);

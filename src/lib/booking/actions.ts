@@ -104,12 +104,19 @@ export async function confirmBookingAction(
 
   try {
     const result = demandeId
-      ? await confirmBooking({ demandeId, numeroConteneur, transporteurNom, dateDepart })
+      ? await confirmBooking({
+          demandeId,
+          numeroConteneur,
+          transporteurNom,
+          dateDepart,
+        })
       : await (async () => {
           const clientId = str(formData, "clientId");
           const produit = str(formData, "produit");
           if (!clientId || !produit) {
-            throw new Error("Sans dossier préalable, client et produit sont obligatoires.");
+            throw new Error(
+              "Sans dossier préalable, client et produit sont obligatoires.",
+            );
           }
           return confirmBooking({
             clientId,

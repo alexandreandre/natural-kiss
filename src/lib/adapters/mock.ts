@@ -437,7 +437,8 @@ export class MockEmailProvider implements EmailProvider {
         id: "eml-voltz-01-instruction",
         from: "typhanie@graines-voltz.com",
         to: ["valentin@natural-kiss.com"],
-        subject: "VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
+        subject:
+          "VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
         receivedAt: "2026-05-13T09:10:00+02:00",
         snippet:
           "Merci de confirmer les quantités et l'instruction sheet pour le vol de vendredi (slips Bellevue, réf. OTPU6220580).",
@@ -447,7 +448,8 @@ export class MockEmailProvider implements EmailProvider {
         id: "eml-voltz-02-quarantaine",
         from: "virginie.jouin@graines-voltz.com",
         to: ["valentin@natural-kiss.com", "ayman@natural-kiss.com"],
-        subject: "RE: VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
+        subject:
+          "RE: VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
         receivedAt: "2026-05-29T14:35:00+02:00",
         snippet:
           "Détention douanière Amsterdam : thrips / Bemisia détectés, Déclaration Additionnelle absente du phyto OTPU6220580.",
@@ -457,7 +459,8 @@ export class MockEmailProvider implements EmailProvider {
         id: "eml-voltz-03-litige",
         from: "virginie.jouin@graines-voltz.com",
         to: ["ayman@natural-kiss.com"],
-        subject: "RE: VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
+        subject:
+          "RE: VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
         receivedAt: "2026-06-01T16:50:00+02:00",
         snippet:
           "Suite à la quarantaine, Voltz conteste la facture et retient les documents de paiement du lot OTPU6220580.",

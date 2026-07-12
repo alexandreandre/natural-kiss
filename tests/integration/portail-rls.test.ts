@@ -55,7 +55,10 @@ async function ensureUser(email: string, clientId: string): Promise<void> {
   }
   const { error } = await admin
     .from("client_users")
-    .upsert({ client_id: clientId, user_id: user.id }, { onConflict: "client_id,user_id" });
+    .upsert(
+      { client_id: clientId, user_id: user.id },
+      { onConflict: "client_id,user_id" },
+    );
   if (error) throw error;
 }
 

@@ -63,7 +63,9 @@ export default async function PortailHomePage() {
                     </p>
                     {l.dateDepart && (
                       <p className="text-muted-foreground/60 mt-1 font-mono text-[11px] tabular-nums">
-                        {format.dateTime(new Date(l.dateDepart), { dateStyle: "medium" })}
+                        {format.dateTime(new Date(l.dateDepart), {
+                          dateStyle: "medium",
+                        })}
                       </p>
                     )}
                   </div>

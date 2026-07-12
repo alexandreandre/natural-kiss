@@ -24,7 +24,11 @@ export default async function PortailLayout({ children }: { children: ReactNode 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col">
       <header className="border-border/70 mb-8 flex items-center justify-between gap-3 border-b pb-5">
-        <Link href="/portail" className="flex items-center gap-3" aria-label="Natural Kiss">
+        <Link
+          href="/portail"
+          className="flex items-center gap-3"
+          aria-label="Natural Kiss"
+        >
           <Logo />
           <span className="border-border/70 text-muted-foreground hidden border-l pl-3 font-mono text-[10px] tracking-[0.14em] uppercase sm:inline">
             {t("space")}

@@ -58,12 +58,10 @@ export async function uploadPreuveAction(formData: FormData): Promise<UploadResu
   const objectKey = `${lot.reference}/${type}-${Date.now()}-${safeName}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
-  const upload = await supabase.storage
-    .from("preuves")
-    .upload(objectKey, bytes, {
-      contentType: file.type || "application/octet-stream",
-      upsert: true,
-    });
+  const upload = await supabase.storage.from("preuves").upload(objectKey, bytes, {
+    contentType: file.type || "application/octet-stream",
+    upsert: true,
+  });
   if (upload.error) return { ok: false, error: upload.error.message };
 
   const visibleClient =

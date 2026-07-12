@@ -65,7 +65,12 @@ export function PortailLoginForm() {
             />
           </label>
           {error && <p className="text-destructive text-xs">{error}</p>}
-          <Button type="submit" size="lg" disabled={pending || !email} className="w-full">
+          <Button
+            type="submit"
+            size="lg"
+            disabled={pending || !email}
+            className="w-full"
+          >
             <Send className="size-4" />
             {pending ? t("sending") : t("submit")}
           </Button>

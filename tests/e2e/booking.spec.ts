@@ -11,7 +11,9 @@ test("le registre affiche les dossiers de démonstration (brouillon / envoyé / 
 }) => {
   await page.goto("/booking");
 
-  await expect(page.getByRole("heading", { name: /Registre des dossiers/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Registre des dossiers/ }),
+  ).toBeVisible();
   await expect(page.getByRole("list").getByText("SHP Tropical Ltd")).toBeVisible();
 
   // Le dossier confirmé (Exo3) est déjà lié à son lot.
@@ -36,9 +38,13 @@ test("confirmation directe (sans dossier) crée le lot", async ({ page }) => {
   const stamp = Date.now();
   await page.goto("/booking");
 
-  await expect(page.getByRole("heading", { name: /Réservation directe/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Réservation directe/ }),
+  ).toBeVisible();
 
-  await page.locator("#quick-clientId").selectOption({ label: "Barfoots of Botley Ltd" });
+  await page
+    .locator("#quick-clientId")
+    .selectOption({ label: "Barfoots of Botley Ltd" });
   await page.locator("#quick-produit").fill(`E2E Direct ${stamp}`);
   await page.locator("#numeroConteneur").fill(`E2ECTR${stamp}`);
   await page.locator("#transporteurNom").fill("MSC / Borchard");
@@ -47,7 +53,9 @@ test("confirmation directe (sans dossier) crée le lot", async ({ page }) => {
 
   // Confirmation visuelle explicite (lien vers le lot créé) avant de naviguer,
   // pour éviter toute course avec l'insert asynchrone.
-  await expect(page.getByText(/^Lot LOT-\d{4}-\d{4} créé$/)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/^Lot LOT-\d{4}-\d{4} créé$/)).toBeVisible({
+    timeout: 15000,
+  });
 
   // La réservation directe ne passe pas par un dossier : le lot créé se
   // retrouve directement dans le registre des lots (M4 → objet Lot, Brique 2).

@@ -46,9 +46,18 @@ export function groupThreads(messages: EmailMessage[]): EmailThread[] {
 
 /** Mots-clés déclenchant une action de suivi dans le résumé (bilingue). */
 const ACTION_KEYWORDS: { pattern: RegExp; action: string }[] = [
-  { pattern: /quarantaine|d[ée]tention|thrips|bemisia/i, action: "Lever le blocage phytosanitaire / la détention douanière." },
-  { pattern: /litige|conteste|contestation|retenu|retient/i, action: "Résoudre le litige financier (documents retenus)." },
-  { pattern: /instruction sheet|quantit[ée]/i, action: "Confirmer les quantités et l'instruction sheet." },
+  {
+    pattern: /quarantaine|d[ée]tention|thrips|bemisia/i,
+    action: "Lever le blocage phytosanitaire / la détention douanière.",
+  },
+  {
+    pattern: /litige|conteste|contestation|retenu|retient/i,
+    action: "Résoudre le litige financier (documents retenus).",
+  },
+  {
+    pattern: /instruction sheet|quantit[ée]/i,
+    action: "Confirmer les quantités et l'instruction sheet.",
+  },
   { pattern: /facture|invoice/i, action: "Vérifier la cohérence de la facture." },
 ];
 
@@ -64,14 +73,18 @@ export function summarizeThread(thread: EmailThread): ThreadSummary {
   const { subject, messages } = thread;
   const participants = [...new Set(messages.flatMap((m) => [m.from, ...m.to]))];
 
-  const points = messages.map((m) => `${m.from} (${m.receivedAt.slice(0, 10)}) : ${m.snippet}`);
+  const points = messages.map(
+    (m) => `${m.from} (${m.receivedAt.slice(0, 10)}) : ${m.snippet}`,
+  );
   const resume =
     `Fil « ${subject} » — ${messages.length} message(s) entre ${messages[0]!.receivedAt.slice(0, 10)} ` +
     `et ${messages[messages.length - 1]!.receivedAt.slice(0, 10)}.\n` +
     points.join("\n");
 
   const text = messages.map((m) => `${m.subject} ${m.snippet}`).join(" ");
-  const actions = ACTION_KEYWORDS.filter((k) => k.pattern.test(text)).map((k) => k.action);
+  const actions = ACTION_KEYWORDS.filter((k) => k.pattern.test(text)).map(
+    (k) => k.action,
+  );
 
   return { resume, actions, participants, messageCount: messages.length };
 }
@@ -101,9 +114,15 @@ export function generateInstructionSheet(ctx: InstructionSheetContext): string {
 }
 
 /** Génère un brouillon de réponse au dernier message d'un fil. */
-export function generateThreadReply(thread: EmailThread, summary: ThreadSummary): string {
+export function generateThreadReply(
+  thread: EmailThread,
+  summary: ThreadSummary,
+): string {
   const last = thread.messages[thread.messages.length - 1]!;
-  const actionLines = summary.actions.length > 0 ? summary.actions.map((a) => `- ${a}`) : ["- Aucune action bloquante identifiée."];
+  const actionLines =
+    summary.actions.length > 0
+      ? summary.actions.map((a) => `- ${a}`)
+      : ["- Aucune action bloquante identifiée."];
   return [
     `Objet : RE: ${thread.subject}`,
     `À : ${last.from}`,

@@ -44,9 +44,13 @@ export function generateDossierText(input: DossierBookingInput): string {
   if (destination) lignes.push(`Destination : ${destination}`);
 
   lignes.push(`Mode de transport souhaité : ${modeLabel(input.mode)}`);
-  if (input.dateSouhaitee) lignes.push(`Date de départ souhaitée : ${input.dateSouhaitee}`);
+  if (input.dateSouhaitee)
+    lignes.push(`Date de départ souhaitée : ${input.dateSouhaitee}`);
 
-  lignes.push("", "Merci de confirmer : n° de conteneur, transporteur, date de départ.");
+  lignes.push(
+    "",
+    "Merci de confirmer : n° de conteneur, transporteur, date de départ.",
+  );
 
   return lignes.join("\n");
 }

@@ -59,7 +59,10 @@ async function ensureUser(email: string, clientId: string): Promise<void> {
   }
   const { error } = await admin
     .from("client_users")
-    .upsert({ client_id: clientId, user_id: user.id }, { onConflict: "client_id,user_id" });
+    .upsert(
+      { client_id: clientId, user_id: user.id },
+      { onConflict: "client_id,user_id" },
+    );
   if (error) throw error;
 }
 
@@ -68,7 +71,10 @@ async function ensureUser(email: string, clientId: string): Promise<void> {
  * canoniques (tels que Supabase les enverrait par email).
  */
 async function magicLink(email: string): Promise<{ tokenHash: string; type: string }> {
-  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  });
   if (error) throw error;
   const props = data.properties!;
   const action = new URL(props.action_link);
@@ -105,10 +111,14 @@ test.beforeAll(async () => {
 test("accès non authentifié → redirection vers la connexion", async ({ page }) => {
   await page.goto("/portail");
   await expect(page).toHaveURL(/\/portail\/login/);
-  await expect(page.getByRole("heading", { name: /Connexion à votre espace/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Connexion à votre espace/ }),
+  ).toBeVisible();
 });
 
-test("client connecté : ne voit que ses lots + photo boîte (M5→portail)", async ({ page }) => {
+test("client connecté : ne voit que ses lots + photo boîte (M5→portail)", async ({
+  page,
+}) => {
   await login(page, BARFOOTS_EMAIL);
   await page.goto("/portail");
 
@@ -131,7 +141,9 @@ test("client connecté : ne voit que ses lots + photo boîte (M5→portail)", as
   await expect(photo).toBeVisible();
 });
 
-test("isolation : un lot d'un autre client est inaccessible (RLS)", async ({ page }) => {
+test("isolation : un lot d'un autre client est inaccessible (RLS)", async ({
+  page,
+}) => {
   await login(page, BARFOOTS_EMAIL);
   await page.goto("/portail");
   await expect(page).toHaveURL(/\/portail(\/)?$/);
