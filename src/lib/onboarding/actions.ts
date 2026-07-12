@@ -74,3 +74,35 @@ export async function onboardDemandeAction(
     return { ok: false, error: e instanceof Error ? e.message : "Erreur inconnue." };
   }
 }
+
+export interface PublicDemandeActionResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * Soumission publique d'une demande (page client `/nouvelle-demande`). Réutilise
+ * le matching interne mais ne renvoie qu'une confirmation neutre : le résultat du
+ * matching reste côté interne (l'équipe NK valide avant l'onboarding).
+ */
+export async function submitPublicDemandeAction(
+  formData: FormData,
+): Promise<PublicDemandeActionResult> {
+  const clientNom = String(formData.get("clientNom") ?? "").trim();
+  const produit = String(formData.get("produit") ?? "").trim();
+  const pays = String(formData.get("pays") ?? "").trim();
+  const contactEmail = String(formData.get("contactEmail") ?? "").trim() || null;
+  const volume = String(formData.get("volume") ?? "").trim() || null;
+
+  if (!clientNom || !produit || !pays) {
+    return { ok: false, error: "Société, produit et pays sont requis." };
+  }
+
+  try {
+    await createDemande({ clientNom, produit, pays, contactEmail, volume });
+    revalidatePath("/demande");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erreur inconnue." };
+  }
+}

@@ -666,6 +666,23 @@
       }
     }
   },
+  "nouvelleDemande": {
+    "kicker": "Natural Kiss — Nouvelle demande",
+    "title": "Demandez un produit pour votre marché",
+    "subtitle": "Indiquez le produit et le pays de destination. Notre équipe vérifie la couverture de nos certifications et revient vers vous avec le pack adapté.",
+    "form": {
+      "company": "Votre société",
+      "email": "Email de contact",
+      "produit": "Produit souhaité",
+      "produitPlaceholder": "ex. Mangue, Brocoli / Tenderstem…",
+      "pays": "Pays de destination",
+      "paysPlaceholder": "ex. UK, FR…",
+      "volume": "Volume estimé (optionnel)",
+      "submit": "Envoyer ma demande"
+    },
+    "confirmationTitle": "Demande bien reçue",
+    "confirmationBody": "Merci ! Notre équipe étudie votre demande et revient vers vous rapidement avec les documents adaptés."
+  },
   "finance": {
     "overview": {
       "kicker": "M10 · Finance & clôture",

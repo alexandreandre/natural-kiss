@@ -204,7 +204,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // Le portail client (T1) et les routes d'auth ont leur propre chrome (cf.
   // src/app/portail/layout.tsx) — pas de navigation interne.
-  if (pathname.startsWith("/portail") || pathname.startsWith("/auth")) {
+  if (
+    pathname.startsWith("/portail") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/nouvelle-demande")
+  ) {
     return (
       <div className="min-h-full px-5 py-6 sm:px-8 sm:py-8 lg:px-10">{children}</div>
     );
