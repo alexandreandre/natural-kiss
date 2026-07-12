@@ -299,7 +299,11 @@ export async function createDemande(
   let mailSent = false;
   let packEnvoyeAt: string | null = null;
   if (suffisant) {
-    await getEmailProvider().send({ to: [destinataire], subject: packSubject, body: packBody });
+    await getEmailProvider().send({
+      to: [destinataire],
+      subject: packSubject,
+      body: packBody,
+    });
     mailSent = true;
     packEnvoyeAt = new Date().toISOString();
   }
@@ -480,19 +484,18 @@ export async function onboardDemande(demandeId: string): Promise<OnboardResult> 
       paysCode: demande.pays,
       certifsLabels: demande.certifs_requises ?? [],
     });
-    const { error: docErr } = await supabase
-      .from("documents_onboarding")
-      .upsert(
-        drafts.map((d) => ({
-          client_id: clientId,
-          demande_id: demandeId,
-          type: d.type,
-          titre: d.titre,
-          contenu_html: d.contenuHtml,
-        })),
-        { onConflict: "demande_id,type" },
-      );
-    if (docErr) throw new Error(`Création des documents impossible : ${docErr.message}`);
+    const { error: docErr } = await supabase.from("documents_onboarding").upsert(
+      drafts.map((d) => ({
+        client_id: clientId,
+        demande_id: demandeId,
+        type: d.type,
+        titre: d.titre,
+        contenu_html: d.contenuHtml,
+      })),
+      { onConflict: "demande_id,type" },
+    );
+    if (docErr)
+      throw new Error(`Création des documents impossible : ${docErr.message}`);
     documentsCreated = drafts.length;
 
     const onbSubject = "Natural Kiss — bienvenue & accès à votre espace client";

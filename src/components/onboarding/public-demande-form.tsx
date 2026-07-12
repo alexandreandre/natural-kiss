@@ -43,17 +43,29 @@ export function PublicDemandeForm() {
       className="grid gap-4 sm:grid-cols-2"
     >
       <div className="flex flex-col gap-1.5 sm:col-span-2">
-        <label htmlFor="clientNom" className={LABEL}>{t("form.company")}</label>
+        <label htmlFor="clientNom" className={LABEL}>
+          {t("form.company")}
+        </label>
         <input id="clientNom" name="clientNom" required className={FIELD} />
       </div>
       <div className="flex flex-col gap-1.5 sm:col-span-2">
-        <label htmlFor="contactEmail" className={LABEL}>{t("form.email")}</label>
+        <label htmlFor="contactEmail" className={LABEL}>
+          {t("form.email")}
+        </label>
         <input id="contactEmail" name="contactEmail" type="email" className={FIELD} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="produit" className={LABEL}>{t("form.produit")}</label>
-        <input id="produit" name="produit" required list="produit-suggestions"
-          placeholder={t("form.produitPlaceholder")} className={FIELD} />
+        <label htmlFor="produit" className={LABEL}>
+          {t("form.produit")}
+        </label>
+        <input
+          id="produit"
+          name="produit"
+          required
+          list="produit-suggestions"
+          placeholder={t("form.produitPlaceholder")}
+          className={FIELD}
+        />
         <datalist id="produit-suggestions">
           <option value="Mangue" />
           <option value="Brocoli / Tenderstem" />
@@ -63,9 +75,17 @@ export function PublicDemandeForm() {
         </datalist>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="pays" className={LABEL}>{t("form.pays")}</label>
-        <input id="pays" name="pays" required list="pays-suggestions"
-          placeholder={t("form.paysPlaceholder")} className={FIELD} />
+        <label htmlFor="pays" className={LABEL}>
+          {t("form.pays")}
+        </label>
+        <input
+          id="pays"
+          name="pays"
+          required
+          list="pays-suggestions"
+          placeholder={t("form.paysPlaceholder")}
+          className={FIELD}
+        />
         <datalist id="pays-suggestions">
           <option value="UK" />
           <option value="FR" />
@@ -74,12 +94,18 @@ export function PublicDemandeForm() {
         </datalist>
       </div>
       <div className="flex flex-col gap-1.5 sm:col-span-2">
-        <label htmlFor="volume" className={LABEL}>{t("form.volume")}</label>
+        <label htmlFor="volume" className={LABEL}>
+          {t("form.volume")}
+        </label>
         <input id="volume" name="volume" className={FIELD} />
       </div>
       <div className="flex items-center gap-3 sm:col-span-2">
         <Button type="submit" disabled={pending}>
-          {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
           {t("form.submit")}
         </Button>
         {error && (

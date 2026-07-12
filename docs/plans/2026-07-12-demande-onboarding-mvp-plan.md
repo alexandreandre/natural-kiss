@@ -17,24 +17,30 @@
 - Conséquence : la migration `0010` s'applique au **cloud**, et les types se régénèrent depuis le **cloud**.
 
 **Charger les variables d'environnement pour la CLI Supabase** (à faire une fois par shell) :
+
 ```bash
 set -a; source .env.local; set +a
 export SUPABASE_DB_PASSWORD="$DB_PASSWORD"   # la CLI attend SUPABASE_DB_PASSWORD
 ```
 
 **Appliquer une migration au cloud** (méthode repo, cf. README §9) :
+
 ```bash
 supabase link --project-ref lpavhkdxewllllmzzgug   # idempotent ; SUPABASE_ACCESS_TOKEN vient de .env.local
 supabase db push                                    # applique supabase/migrations/*.sql
 ```
+
 > Fallback si `db push` pose problème (connexion directe port 5432) :
+>
 > ```bash
 > psql "postgresql://postgres:$DB_PASSWORD@db.lpavhkdxewllllmzzgug.supabase.co:5432/postgres" \
 >   -f supabase/migrations/0010_documents_onboarding.sql
 > ```
+>
 > Alternative locale (si un jour Docker est présent) : `npm run db:reset` puis `npm run types`.
 
 **Régénérer les types depuis le cloud :**
+
 ```bash
 npm run types:cloud    # supabase gen types typescript --linked --schema public > src/lib/supabase/types.ts
 ```
@@ -42,6 +48,7 @@ npm run types:cloud    # supabase gen types typescript --linked --schema public 
 **Commits :** le repo est sur `main`. **Créer une branche d'abord** (Task 0). Messages de commit **en français** (convention repo). Terminer chaque message par la ligne `Co-Authored-By: …` requise.
 
 **Vérification qualité (rappel des commandes) :**
+
 ```bash
 npm run lint && npm run typecheck && npm run format:check
 npm test                     # Vitest (unit + intégration, contre le cloud)
@@ -53,14 +60,19 @@ npm run test:e2e             # Playwright
 ## Task 0 : Branche de travail
 
 **Step 1 — Créer la branche**
+
 ```bash
 git checkout -b feat/demande-onboarding-mvp
 ```
+
 **Step 2 — Vérifier l'état propre**
+
 ```bash
 git status    # doit inclure les 2 fichiers docs/plans déjà écrits (design + ce plan), non commités
 ```
+
 **Step 3 — Commit du design + plan**
+
 ```bash
 git add docs/plans/2026-07-12-demande-onboarding-mvp-design.md docs/plans/2026-07-12-demande-onboarding-mvp-plan.md
 git commit -m "docs(demande): design & plan du MVP demande→onboarding→espace client"
@@ -71,12 +83,14 @@ git commit -m "docs(demande): design & plan du MVP demande→onboarding→espace
 ## Task 1 : Migration DB `0010` + types
 
 **Files:**
+
 - Create: `supabase/migrations/0010_documents_onboarding.sql`
 - Modify (généré) : `src/lib/supabase/types.ts`
 
 **Step 1 — Écrire la migration**
 
 Créer `supabase/migrations/0010_documents_onboarding.sql` :
+
 ```sql
 -- ============================================================================
 -- Brique 7bis — Documents d'onboarding (client-scopés) + boîte d'envoi (démo)
@@ -157,27 +171,34 @@ grant select, insert, update, delete
 ```
 
 **Step 2 — Appliquer la migration au cloud**
+
 ```bash
 set -a; source .env.local; set +a
 export SUPABASE_DB_PASSWORD="$DB_PASSWORD"
 supabase link --project-ref lpavhkdxewllllmzzgug
 supabase db push
 ```
+
 Expected : `Applying migration 0010_documents_onboarding.sql...` sans erreur.
 
 **Step 3 — Régénérer les types**
+
 ```bash
 npm run types:cloud
 ```
+
 Expected : `src/lib/supabase/types.ts` modifié ; il contient désormais `documents_onboarding`, `emails_envoyes`, et les enums `document_onboarding_type`, `email_categorie`.
 
 **Step 4 — Vérifier la compilation**
+
 ```bash
 npm run typecheck
 ```
+
 Expected : PASS (aucune référence cassée ; les nouvelles tables ne sont pas encore utilisées).
 
 **Step 5 — Commit**
+
 ```bash
 git add supabase/migrations/0010_documents_onboarding.sql src/lib/supabase/types.ts
 git commit -m "feat(db): migration 0010 — documents_onboarding (RLS client) + emails_envoyes"
@@ -188,12 +209,14 @@ git commit -m "feat(db): migration 0010 — documents_onboarding (RLS client) + 
 ## Task 2 : Générateur de documents (logique pure, TDD)
 
 **Files:**
+
 - Create: `src/lib/onboarding/documents.ts`
 - Test: `tests/unit/onboarding-documents.test.ts`
 
 **Step 1 — Écrire le test qui échoue**
 
 Créer `tests/unit/onboarding-documents.test.ts` :
+
 ```ts
 import { describe, expect, it } from "vitest";
 
@@ -240,14 +263,17 @@ describe("buildOnboardingDocuments", () => {
 ```
 
 **Step 2 — Lancer le test (doit échouer)**
+
 ```bash
 npm test -- onboarding-documents
 ```
+
 Expected : FAIL — `Failed to resolve import "@/lib/onboarding/documents"`.
 
 **Step 3 — Implémenter le module**
 
 Créer `src/lib/onboarding/documents.ts` :
+
 ```ts
 /**
  * Générateur de documents d'onboarding (M2) — logique **pure** (aucune I/O),
@@ -335,12 +361,15 @@ export function buildOnboardingDocuments(
 ```
 
 **Step 4 — Lancer le test (doit passer)**
+
 ```bash
 npm test -- onboarding-documents
 ```
+
 Expected : PASS (5 tests).
 
 **Step 5 — Commit**
+
 ```bash
 git add src/lib/onboarding/documents.ts tests/unit/onboarding-documents.test.ts
 git commit -m "feat(onboarding): générateur pur des documents d'onboarding (templates MVP)"
@@ -351,12 +380,14 @@ git commit -m "feat(onboarding): générateur pur des documents d'onboarding (te
 ## Task 3 : Service — journaliser les emails, générer les documents à l'onboarding
 
 **Files:**
+
 - Modify: `src/lib/onboarding/service.ts`
 - Test: `tests/integration/onboarding-documents.test.ts` (create)
 
 **Step 1 — Écrire le test d'intégration qui échoue**
 
 Créer `tests/integration/onboarding-documents.test.ts` :
+
 ```ts
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, describe, expect, it } from "vitest";
@@ -381,10 +412,13 @@ const RUN = Date.now();
 const created = { demandeId: "", clientId: "", userId: "" };
 
 afterAll(async () => {
-  if (created.demandeId) await admin.from("emails_envoyes").delete().eq("demande_id", created.demandeId);
-  if (created.demandeId) await admin.from("demandes").delete().eq("id", created.demandeId);
+  if (created.demandeId)
+    await admin.from("emails_envoyes").delete().eq("demande_id", created.demandeId);
+  if (created.demandeId)
+    await admin.from("demandes").delete().eq("id", created.demandeId);
   if (created.clientId) await admin.from("clients").delete().eq("id", created.clientId); // cascade docs + client_users
-  if (created.userId) await admin.auth.admin.deleteUser(created.userId).catch(() => undefined);
+  if (created.userId)
+    await admin.auth.admin.deleteUser(created.userId).catch(() => undefined);
 });
 
 describe("Onboarding — documents & emails (Supabase)", () => {
@@ -417,7 +451,11 @@ describe("Onboarding — documents & emails (Supabase)", () => {
       .from("documents_onboarding")
       .select("type, titre")
       .eq("client_id", onboard.clientId);
-    expect((docs ?? []).map((d) => d.type).sort()).toEqual(["bienvenue", "certifs", "produit"]);
+    expect((docs ?? []).map((d) => d.type).sort()).toEqual([
+      "bienvenue",
+      "certifs",
+      "produit",
+    ]);
 
     // Email d'onboarding journalisé.
     const { data: onbMails } = await admin
@@ -438,7 +476,9 @@ describe("Onboarding — documents & emails (Supabase)", () => {
     });
     expect(signErr).toBeNull();
 
-    const { data, error } = await c.from("documents_onboarding").select("id, client_id");
+    const { data, error } = await c
+      .from("documents_onboarding")
+      .select("id, client_id");
     expect(error).toBeNull();
     expect((data ?? []).length).toBe(3);
     expect((data ?? []).every((d) => d.client_id === created.clientId)).toBe(true);
@@ -455,23 +495,29 @@ describe("Onboarding — documents & emails (Supabase)", () => {
 ```
 
 **Step 2 — Lancer le test (doit échouer)**
+
 ```bash
 npm test -- onboarding-documents.test
 ```
+
 Expected : FAIL — `onboard.documentsCreated` est `undefined` et aucun email n'est journalisé.
 
 **Step 3 — Étendre `service.ts`**
 
 3a. Ajouter les imports en tête (après les imports existants) :
+
 ```ts
 import { buildOnboardingDocuments } from "@/lib/onboarding/documents";
 ```
+
 Et compléter le bloc de types depuis `Database` :
+
 ```ts
 type EmailCategorie = Database["public"]["Enums"]["email_categorie"];
 ```
 
 3b. Ajouter un helper de journalisation (juste avant `createDemande`) :
+
 ```ts
 /** Journalise un email « envoyé » (mock) pour la boîte d'envoi démo. */
 async function logEmailEnvoye(
@@ -500,58 +546,68 @@ async function logEmailEnvoye(
 3c. Dans `createDemande`, remplacer le bloc d'envoi du pack (le `if (suffisant) { … }` autour des lignes 246-259) par une version qui construit sujet/corps, envoie **et journalise**. Le `demande_id` n'existe pas encore à ce stade → on journalise **après** l'insertion. Modifier ainsi :
 
 Remplacer :
+
 ```ts
-  // 1) Envoi automatique du pack (mock) au vert, avant persistance du timestamp.
-  let mailSent = false;
-  let packEnvoyeAt: string | null = null;
-  if (suffisant) {
-    const destinataire = input.contactEmail?.trim() || null;
-    await getEmailProvider().send({
-      to: destinataire ? [destinataire] : ["contact@natural-kiss.com"],
-      subject: `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`,
-      body:
-        `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
-        `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
-        `(${match.couvertes.map((t) => CERTIF_LABELS[t]).join(", ")}), toutes valides ` +
-        `et couvrant ce produit / marché.\n\nBien cordialement,\nNatural Kiss`,
-    });
-    mailSent = true;
-    packEnvoyeAt = new Date().toISOString();
-  }
+// 1) Envoi automatique du pack (mock) au vert, avant persistance du timestamp.
+let mailSent = false;
+let packEnvoyeAt: string | null = null;
+if (suffisant) {
+  const destinataire = input.contactEmail?.trim() || null;
+  await getEmailProvider().send({
+    to: destinataire ? [destinataire] : ["contact@natural-kiss.com"],
+    subject: `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`,
+    body:
+      `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
+      `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
+      `(${match.couvertes.map((t) => CERTIF_LABELS[t]).join(", ")}), toutes valides ` +
+      `et couvrant ce produit / marché.\n\nBien cordialement,\nNatural Kiss`,
+  });
+  mailSent = true;
+  packEnvoyeAt = new Date().toISOString();
+}
 ```
+
 par :
+
 ```ts
-  // 1) Envoi automatique du pack (mock) au vert, avant persistance du timestamp.
-  const destinataire = input.contactEmail?.trim() || "contact@natural-kiss.com";
-  const packSubject = `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`;
-  const packBody =
-    `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
-    `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
-    `(${match.couvertes.map((t) => CERTIF_LABELS[t]).join(", ")}), toutes valides ` +
-    `et couvrant ce produit / marché.\n\nBien cordialement,\nNatural Kiss`;
-  let mailSent = false;
-  let packEnvoyeAt: string | null = null;
-  if (suffisant) {
-    await getEmailProvider().send({ to: [destinataire], subject: packSubject, body: packBody });
-    mailSent = true;
-    packEnvoyeAt = new Date().toISOString();
-  }
+// 1) Envoi automatique du pack (mock) au vert, avant persistance du timestamp.
+const destinataire = input.contactEmail?.trim() || "contact@natural-kiss.com";
+const packSubject = `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`;
+const packBody =
+  `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
+  `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
+  `(${match.couvertes.map((t) => CERTIF_LABELS[t]).join(", ")}), toutes valides ` +
+  `et couvrant ce produit / marché.\n\nBien cordialement,\nNatural Kiss`;
+let mailSent = false;
+let packEnvoyeAt: string | null = null;
+if (suffisant) {
+  await getEmailProvider().send({
+    to: [destinataire],
+    subject: packSubject,
+    body: packBody,
+  });
+  mailSent = true;
+  packEnvoyeAt = new Date().toISOString();
+}
 ```
+
 Puis, **après** l'insertion réussie de la demande (juste après `const demandeId = inserted.id;`), ajouter la journalisation du pack :
+
 ```ts
-  if (suffisant) {
-    await logEmailEnvoye(supabase, {
-      categorie: "pack_certif",
-      to: destinataire,
-      subject: packSubject,
-      body: packBody,
-      demandeId,
-      clientId: input.clientId ?? null,
-    });
-  }
+if (suffisant) {
+  await logEmailEnvoye(supabase, {
+    categorie: "pack_certif",
+    to: destinataire,
+    subject: packSubject,
+    body: packBody,
+    demandeId,
+    clientId: input.clientId ?? null,
+  });
+}
 ```
 
 3d. Étendre `OnboardResult` (ajouter le compteur de documents) :
+
 ```ts
 export interface OnboardResult {
   clientId: string;
@@ -564,12 +620,15 @@ export interface OnboardResult {
 
 3e. Dans `onboardDemande`, élargir le `select` de la demande pour disposer du produit / pays / certifs :
 Remplacer la ligne du select :
+
 ```ts
     .select(
       "id, client_id, client_nom, contact_email, pays, decision, espace_client_cree",
     )
 ```
+
 par :
+
 ```ts
     .select(
       "id, client_id, client_nom, contact_email, produit, pays, decision, espace_client_cree, certifs_requises",
@@ -577,66 +636,71 @@ par :
 ```
 
 3f. À la fin de `onboardDemande`, **avant** le `return`, insérer la génération des documents + l'email d'onboarding (idempotent : seulement si l'espace n'était pas déjà créé) :
+
 ```ts
-  // 5) Documents d'onboarding + email (idempotent : une seule fois par demande).
-  let documentsCreated = 0;
-  if (!demande.espace_client_cree) {
-    const drafts = buildOnboardingDocuments({
-      clientNom: demande.client_nom,
-      produit: demande.produit,
-      paysCode: demande.pays,
-      certifsLabels: demande.certifs_requises ?? [],
-    });
-    const { error: docErr } = await supabase
-      .from("documents_onboarding")
-      .upsert(
-        drafts.map((d) => ({
-          client_id: clientId,
-          demande_id: demandeId,
-          type: d.type,
-          titre: d.titre,
-          contenu_html: d.contenuHtml,
-        })),
-        { onConflict: "demande_id,type" },
-      );
-    if (docErr) throw new Error(`Création des documents impossible : ${docErr.message}`);
-    documentsCreated = drafts.length;
+// 5) Documents d'onboarding + email (idempotent : une seule fois par demande).
+let documentsCreated = 0;
+if (!demande.espace_client_cree) {
+  const drafts = buildOnboardingDocuments({
+    clientNom: demande.client_nom,
+    produit: demande.produit,
+    paysCode: demande.pays,
+    certifsLabels: demande.certifs_requises ?? [],
+  });
+  const { error: docErr } = await supabase.from("documents_onboarding").upsert(
+    drafts.map((d) => ({
+      client_id: clientId,
+      demande_id: demandeId,
+      type: d.type,
+      titre: d.titre,
+      contenu_html: d.contenuHtml,
+    })),
+    { onConflict: "demande_id,type" },
+  );
+  if (docErr) throw new Error(`Création des documents impossible : ${docErr.message}`);
+  documentsCreated = drafts.length;
 
-    const onbSubject = "Natural Kiss — bienvenue & accès à votre espace client";
-    const onbBody =
-      `Bonjour,\n\nVotre espace client Natural Kiss est prêt. Vous y suivrez vos ` +
-      `lots, documents et statuts.\n\nDocuments joints :\n` +
-      drafts.map((d) => `• ${d.titre}`).join("\n") +
-      `\n\nConnexion à votre espace : /portail/login\n\nBien cordialement,\nNatural Kiss`;
-    await getEmailProvider().send({ to: [email], subject: onbSubject, body: onbBody });
-    await logEmailEnvoye(supabase, {
-      categorie: "onboarding",
-      to: email,
-      subject: onbSubject,
-      body: onbBody,
-      demandeId,
-      clientId,
-    });
-  }
+  const onbSubject = "Natural Kiss — bienvenue & accès à votre espace client";
+  const onbBody =
+    `Bonjour,\n\nVotre espace client Natural Kiss est prêt. Vous y suivrez vos ` +
+    `lots, documents et statuts.\n\nDocuments joints :\n` +
+    drafts.map((d) => `• ${d.titre}`).join("\n") +
+    `\n\nConnexion à votre espace : /portail/login\n\nBien cordialement,\nNatural Kiss`;
+  await getEmailProvider().send({ to: [email], subject: onbSubject, body: onbBody });
+  await logEmailEnvoye(supabase, {
+    categorie: "onboarding",
+    to: email,
+    subject: onbSubject,
+    body: onbBody,
+    demandeId,
+    clientId,
+  });
+}
 
-  return { clientId, userId, email, alreadyExisted, documentsCreated };
+return { clientId, userId, email, alreadyExisted, documentsCreated };
 ```
+
 > ⚠️ Retirer l'ancien `return { clientId, userId, email, alreadyExisted };` remplacé ci-dessus.
 > Note : l'étape « 4) Marque la demande onboardée » met `espace_client_cree=true` en base, mais l'objet `demande` en mémoire garde son ancienne valeur (`false` au premier passage) — la garde d'idempotence est donc correcte.
 
 **Step 4 — Lancer le test (doit passer)**
+
 ```bash
 npm test -- onboarding-documents.test
 ```
+
 Expected : PASS (3 tests). Si `signInWithPassword` échoue, vérifier que `PORTAIL_DEMO_PASSWORD` est cohérent (défaut `NaturalKiss!Demo2026`).
 
 **Step 5 — Vérifier la non-régression du test onboarding existant**
+
 ```bash
 npm test -- onboarding
 ```
+
 Expected : PASS (unit matching + intégration onboarding + documents).
 
 **Step 6 — Commit**
+
 ```bash
 git add src/lib/onboarding/service.ts tests/integration/onboarding-documents.test.ts
 git commit -m "feat(onboarding): génère les documents + journalise les emails (pack & onboarding)"
@@ -647,11 +711,13 @@ git commit -m "feat(onboarding): génère les documents + journalise les emails 
 ## Task 4 : Aperçu interne — exposer la boîte d'envoi dans `getOnboardingOverview`
 
 **Files:**
+
 - Modify: `src/lib/onboarding/service.ts`
 
 **Step 1 — Ajouter le type de ligne email et l'étendre à l'overview**
 
 4a. Après l'interface `OnboardingOverview`, ajouter :
+
 ```ts
 export interface EmailEnvoyeRow {
   id: string;
@@ -661,7 +727,9 @@ export interface EmailEnvoyeRow {
   createdAt: string;
 }
 ```
+
 Et compléter `OnboardingOverview` :
+
 ```ts
 export interface OnboardingOverview {
   demandes: DemandeRow[];
@@ -672,6 +740,7 @@ export interface OnboardingOverview {
 ```
 
 4b. Dans `getOnboardingOverview`, ajouter la lecture des emails au `Promise.all` (4ᵉ requête) :
+
 ```ts
     supabase
       .from("emails_envoyes")
@@ -679,17 +748,22 @@ export interface OnboardingOverview {
       .order("created_at", { ascending: false })
       .limit(10),
 ```
+
 en récupérant `emails` dans la déstructuration :
+
 ```ts
-  const [certifs, demandes, taches, emails] = await Promise.all([ /* … */ ]);
+const [certifs, demandes, taches, emails] = await Promise.all([/* … */]);
 ```
+
 et ajouter la garde d'erreur :
+
 ```ts
-  if (emails.error)
-    throw new Error(`Lecture des emails impossible : ${emails.error.message}`);
+if (emails.error)
+  throw new Error(`Lecture des emails impossible : ${emails.error.message}`);
 ```
 
 4c. Dans le `return`, ajouter le mapping :
+
 ```ts
     emails: (emails.data ?? []).map((e) => ({
       id: e.id,
@@ -701,12 +775,15 @@ et ajouter la garde d'erreur :
 ```
 
 **Step 2 — Vérifier la compilation**
+
 ```bash
 npm run typecheck
 ```
+
 Expected : PASS.
 
 **Step 3 — Commit**
+
 ```bash
 git add src/lib/onboarding/service.ts
 git commit -m "feat(onboarding): expose les emails envoyés dans l'aperçu interne"
@@ -717,6 +794,7 @@ git commit -m "feat(onboarding): expose les emails envoyés dans l'aperçu inter
 ## Task 5 : Lecture portail des documents + page de rendu
 
 **Files:**
+
 - Modify: `src/lib/portail/data.ts`
 - Create: `src/app/portail/documents/[id]/page.tsx`
 - Modify: `src/app/portail/page.tsx`
@@ -725,6 +803,7 @@ git commit -m "feat(onboarding): expose les emails envoyés dans l'aperçu inter
 **Step 1 — Ajouter les lectures RLS dans `portail/data.ts`**
 
 Ajouter à la fin de `src/lib/portail/data.ts` :
+
 ```ts
 export interface PortailOnboardingDoc {
   id: string;
@@ -779,6 +858,7 @@ export async function getMyDocument(
 **Step 2 — Ajouter les clés i18n**
 
 Dans `src/i18n/messages/fr.json`, à l'intérieur de l'objet `"portail"` (par ex. après la clé `"notFound"`), ajouter :
+
 ```json
     "documentsTitle": "Vos documents",
     "documentsEmpty": "Aucun document pour l'instant.",
@@ -789,7 +869,9 @@ Dans `src/i18n/messages/fr.json`, à l'intérieur de l'objet `"portail"` (par ex
     },
     "documentPrint": "Imprimer / PDF",
 ```
+
 Dans `src/i18n/messages/en.json`, même emplacement dans `"portail"` :
+
 ```json
     "documentsTitle": "Your documents",
     "documentsEmpty": "No document yet.",
@@ -800,11 +882,13 @@ Dans `src/i18n/messages/en.json`, même emplacement dans `"portail"` :
     },
     "documentPrint": "Print / PDF",
 ```
+
 > ⚠️ Vérifier les virgules JSON (ajouter une virgule après la clé précédente).
 
 **Step 3 — Créer la page de rendu du document**
 
 Créer `src/app/portail/documents/[id]/page.tsx` :
+
 ```tsx
 import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -848,7 +932,7 @@ export default async function PortailDocumentPage({
           {/* Contenu généré par nos propres gabarits (documents.ts) — pas d'entrée
               utilisateur libre non échappée : rendu HTML sûr. */}
           <div
-            className="prose-nk max-w-none text-sm leading-relaxed [&_h1]:font-display [&_h1]:mb-3 [&_h1]:text-2xl [&_h1]:font-medium [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_p]:mb-2.5 [&_ul]:my-2"
+            className="prose-nk [&_h1]:font-display max-w-none text-sm leading-relaxed [&_h1]:mb-3 [&_h1]:text-2xl [&_h1]:font-medium [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_p]:mb-2.5 [&_ul]:my-2"
             dangerouslySetInnerHTML={{ __html: doc.contenuHtml }}
           />
         </article>
@@ -861,47 +945,52 @@ export default async function PortailDocumentPage({
 **Step 4 — Ajouter la section « Vos documents » sur l'accueil du portail**
 
 Dans `src/app/portail/page.tsx` :
+
 - ajouter l'import : `import { listMyLots, listMyDocuments } from "@/lib/portail/data";` (remplace l'import `listMyLots` existant) ;
 - ajouter `import { FileText } from "lucide-react";` à la ligne d'import lucide existante (`ArrowUpRight, PackageSearch, FileText`) ;
 - après `const lots = await listMyLots();` ajouter `const docs = await listMyDocuments();` ;
 - insérer une nouvelle `<section>` **après** la section des lots (avant la fermeture du `</div>` racine) :
+
 ```tsx
-      <section className="mt-10">
-        <h2 className="text-muted-foreground/70 mb-3 font-mono text-[10px] tracking-[0.14em] uppercase">
-          {t("documentsTitle")}
-        </h2>
-        {docs.length === 0 ? (
-          <div className="border-border rounded-[4px] border border-dashed p-6 text-center">
-            <p className="text-muted-foreground text-sm">{t("documentsEmpty")}</p>
-          </div>
-        ) : (
-          <ul className="divide-border/60 border-border divide-y rounded-[4px] border">
-            {docs.map((d) => (
-              <li key={d.id}>
-                <Link
-                  href={`/portail/documents/${d.id}`}
-                  className="hover:bg-accent/40 flex items-center gap-3 px-4 py-3.5 transition-colors"
-                >
-                  <FileText className="text-muted-foreground/70 size-4 shrink-0" />
-                  <span className="text-sm font-medium">{d.titre}</span>
-                  <span className="text-muted-foreground/60 ml-auto font-mono text-[10px] tracking-[0.12em] uppercase">
-                    {t(`documentType.${d.type}`)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+<section className="mt-10">
+  <h2 className="text-muted-foreground/70 mb-3 font-mono text-[10px] tracking-[0.14em] uppercase">
+    {t("documentsTitle")}
+  </h2>
+  {docs.length === 0 ? (
+    <div className="border-border rounded-[4px] border border-dashed p-6 text-center">
+      <p className="text-muted-foreground text-sm">{t("documentsEmpty")}</p>
+    </div>
+  ) : (
+    <ul className="divide-border/60 border-border divide-y rounded-[4px] border">
+      {docs.map((d) => (
+        <li key={d.id}>
+          <Link
+            href={`/portail/documents/${d.id}`}
+            className="hover:bg-accent/40 flex items-center gap-3 px-4 py-3.5 transition-colors"
+          >
+            <FileText className="text-muted-foreground/70 size-4 shrink-0" />
+            <span className="text-sm font-medium">{d.titre}</span>
+            <span className="text-muted-foreground/60 ml-auto font-mono text-[10px] tracking-[0.12em] uppercase">
+              {t(`documentType.${d.type}`)}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
 ```
 
 **Step 5 — Vérifier compilation + non-régression portail**
+
 ```bash
 npm run typecheck && npm test -- portail
 ```
+
 Expected : PASS.
 
 **Step 6 — Commit**
+
 ```bash
 git add src/lib/portail/data.ts "src/app/portail/documents/[id]/page.tsx" src/app/portail/page.tsx src/i18n/messages/fr.json src/i18n/messages/en.json
 git commit -m "feat(portail): section « Vos documents » + page de rendu (RLS)"
@@ -912,12 +1001,14 @@ git commit -m "feat(portail): section « Vos documents » + page de rendu (RLS)"
 ## Task 6 : Panneau « Emails envoyés » sur la page interne `/demande`
 
 **Files:**
+
 - Modify: `src/app/demande/page.tsx`
 - Modify: `src/i18n/messages/fr.json`, `src/i18n/messages/en.json`
 
 **Step 1 — Clés i18n**
 
 Dans `fr.json`, à l'intérieur de `"demande"` (après le sous-objet `"coffre"`), ajouter :
+
 ```json
     ,"outbox": {
       "title": "Emails envoyés (démo)",
@@ -929,9 +1020,11 @@ Dans `fr.json`, à l'intérieur de `"demande"` (après le sous-objet `"coffre"`)
       }
     }
 ```
+
 > ⚠️ Insérer correctement : `"coffre"` se termine par `}` — ajouter `,` puis la clé `"outbox"`. Vérifier que l'objet `"demande"` reste du JSON valide.
 
 Dans `en.json`, même emplacement :
+
 ```json
     ,"outbox": {
       "title": "Sent emails (demo)",
@@ -947,48 +1040,51 @@ Dans `en.json`, même emplacement :
 **Step 2 — Rendre le panneau**
 
 Dans `src/app/demande/page.tsx` :
+
 - ajouter `Mail` à l'import lucide : `import { BellRing, Mail, ShieldCheck } from "lucide-react";` ;
 - récupérer `emails` : `const { demandes, coffre, alertes, emails } = await getOnboardingOverview();` ;
 - ajouter une `<section>` **après** la section « Coffre certifications » (juste avant la fermeture `</div>` racine) :
+
 ```tsx
-      {/* ── Emails envoyés (démo) ────────────────────────────────────── */}
-      <section>
-        <h2 className="font-display flex items-center gap-2 text-xl font-medium tracking-tight">
-          <Mail className="text-primary size-5" />
-          {t("demande.outbox.title")}
-        </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {t("demande.outbox.subtitle")}
-        </p>
-        {emails.length === 0 ? (
-          <p className="text-muted-foreground mt-3 text-sm">
-            {t("demande.outbox.empty")}
-          </p>
-        ) : (
-          <ul className="divide-border/60 border-border mt-4 divide-y rounded-[4px] border">
-            {emails.map((e) => (
-              <li key={e.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                <span className="border-primary/25 bg-primary/5 text-primary rounded-[3px] border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] uppercase">
-                  {t(`demande.outbox.categorie.${e.categorie}`)}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-sm">{e.subject}</span>
-                <span className="text-muted-foreground/70 truncate font-mono text-[11px]">
-                  {e.toEmail}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+{
+  /* ── Emails envoyés (démo) ────────────────────────────────────── */
+}
+<section>
+  <h2 className="font-display flex items-center gap-2 text-xl font-medium tracking-tight">
+    <Mail className="text-primary size-5" />
+    {t("demande.outbox.title")}
+  </h2>
+  <p className="text-muted-foreground mt-1 text-sm">{t("demande.outbox.subtitle")}</p>
+  {emails.length === 0 ? (
+    <p className="text-muted-foreground mt-3 text-sm">{t("demande.outbox.empty")}</p>
+  ) : (
+    <ul className="divide-border/60 border-border mt-4 divide-y rounded-[4px] border">
+      {emails.map((e) => (
+        <li key={e.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+          <span className="border-primary/25 bg-primary/5 text-primary rounded-[3px] border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] uppercase">
+            {t(`demande.outbox.categorie.${e.categorie}`)}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm">{e.subject}</span>
+          <span className="text-muted-foreground/70 truncate font-mono text-[11px]">
+            {e.toEmail}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>;
 ```
 
 **Step 3 — Vérifier**
+
 ```bash
 npm run typecheck
 ```
+
 Expected : PASS.
 
 **Step 4 — Commit**
+
 ```bash
 git add src/app/demande/page.tsx src/i18n/messages/fr.json src/i18n/messages/en.json
 git commit -m "feat(demande): panneau « Emails envoyés (démo) » sur la page interne"
@@ -999,6 +1095,7 @@ git commit -m "feat(demande): panneau « Emails envoyés (démo) » sur la page 
 ## Task 7 : Page publique client `/nouvelle-demande`
 
 **Files:**
+
 - Modify: `src/lib/onboarding/actions.ts`
 - Create: `src/components/onboarding/public-demande-form.tsx`
 - Create: `src/app/nouvelle-demande/page.tsx`
@@ -1008,6 +1105,7 @@ git commit -m "feat(demande): panneau « Emails envoyés (démo) » sur la page 
 **Step 1 — Server action publique (neutre)**
 
 Dans `src/lib/onboarding/actions.ts`, ajouter à la fin :
+
 ```ts
 export interface PublicDemandeActionResult {
   ok: boolean;
@@ -1045,6 +1143,7 @@ export async function submitPublicDemandeAction(
 **Step 2 — Formulaire client**
 
 Créer `src/components/onboarding/public-demande-form.tsx` :
+
 ```tsx
 "use client";
 
@@ -1091,17 +1190,29 @@ export function PublicDemandeForm() {
       className="grid gap-4 sm:grid-cols-2"
     >
       <div className="flex flex-col gap-1.5 sm:col-span-2">
-        <label htmlFor="clientNom" className={LABEL}>{t("form.company")}</label>
+        <label htmlFor="clientNom" className={LABEL}>
+          {t("form.company")}
+        </label>
         <input id="clientNom" name="clientNom" required className={FIELD} />
       </div>
       <div className="flex flex-col gap-1.5 sm:col-span-2">
-        <label htmlFor="contactEmail" className={LABEL}>{t("form.email")}</label>
+        <label htmlFor="contactEmail" className={LABEL}>
+          {t("form.email")}
+        </label>
         <input id="contactEmail" name="contactEmail" type="email" className={FIELD} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="produit" className={LABEL}>{t("form.produit")}</label>
-        <input id="produit" name="produit" required list="produit-suggestions"
-          placeholder={t("form.produitPlaceholder")} className={FIELD} />
+        <label htmlFor="produit" className={LABEL}>
+          {t("form.produit")}
+        </label>
+        <input
+          id="produit"
+          name="produit"
+          required
+          list="produit-suggestions"
+          placeholder={t("form.produitPlaceholder")}
+          className={FIELD}
+        />
         <datalist id="produit-suggestions">
           <option value="Mangue" />
           <option value="Brocoli / Tenderstem" />
@@ -1111,9 +1222,17 @@ export function PublicDemandeForm() {
         </datalist>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="pays" className={LABEL}>{t("form.pays")}</label>
-        <input id="pays" name="pays" required list="pays-suggestions"
-          placeholder={t("form.paysPlaceholder")} className={FIELD} />
+        <label htmlFor="pays" className={LABEL}>
+          {t("form.pays")}
+        </label>
+        <input
+          id="pays"
+          name="pays"
+          required
+          list="pays-suggestions"
+          placeholder={t("form.paysPlaceholder")}
+          className={FIELD}
+        />
         <datalist id="pays-suggestions">
           <option value="UK" />
           <option value="FR" />
@@ -1122,12 +1241,18 @@ export function PublicDemandeForm() {
         </datalist>
       </div>
       <div className="flex flex-col gap-1.5 sm:col-span-2">
-        <label htmlFor="volume" className={LABEL}>{t("form.volume")}</label>
+        <label htmlFor="volume" className={LABEL}>
+          {t("form.volume")}
+        </label>
         <input id="volume" name="volume" className={FIELD} />
       </div>
       <div className="flex items-center gap-3 sm:col-span-2">
         <Button type="submit" disabled={pending}>
-          {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
           {t("form.submit")}
         </Button>
         {error && (
@@ -1145,6 +1270,7 @@ export function PublicDemandeForm() {
 **Step 3 — Page publique**
 
 Créer `src/app/nouvelle-demande/page.tsx` :
+
 ```tsx
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -1193,10 +1319,13 @@ export default async function NouvelleDemandePage() {
 **Step 4 — Exclure `/nouvelle-demande` du chrome interne (sidebar)**
 
 Dans `src/components/layout/app-shell.tsx`, remplacer la condition :
+
 ```tsx
   if (pathname.startsWith("/portail") || pathname.startsWith("/auth")) {
 ```
+
 par :
+
 ```tsx
   if (
     pathname.startsWith("/portail") ||
@@ -1204,11 +1333,13 @@ par :
     pathname.startsWith("/nouvelle-demande")
   ) {
 ```
+
 > Vérifier que `/nouvelle-demande` ne collisionne PAS avec `/demande` : `"/nouvelle-demande".startsWith("/demande")` est `false` ✓.
 
 **Step 5 — Clés i18n**
 
 Dans `fr.json`, ajouter une clé racine `"nouvelleDemande"` (par ex. juste après l'objet `"demande"`) :
+
 ```json
   "nouvelleDemande": {
     "kicker": "Natural Kiss — Nouvelle demande",
@@ -1228,7 +1359,9 @@ Dans `fr.json`, ajouter une clé racine `"nouvelleDemande"` (par ex. juste aprè
     "confirmationBody": "Merci ! Notre équipe étudie votre demande et revient vers vous rapidement avec les documents adaptés."
   },
 ```
+
 Dans `en.json`, même emplacement :
+
 ```json
   "nouvelleDemande": {
     "kicker": "Natural Kiss — New request",
@@ -1248,15 +1381,19 @@ Dans `en.json`, même emplacement :
     "confirmationBody": "Thank you! Our team is reviewing your request and will get back to you shortly with the right documents."
   },
 ```
+
 > ⚠️ Ajouter la virgule après l'objet `"demande"` précédent.
 
 **Step 6 — Vérifier**
+
 ```bash
 npm run typecheck && npm run lint
 ```
+
 Expected : PASS.
 
 **Step 7 — Commit**
+
 ```bash
 git add src/lib/onboarding/actions.ts src/components/onboarding/public-demande-form.tsx src/app/nouvelle-demande/page.tsx src/components/layout/app-shell.tsx src/i18n/messages/fr.json src/i18n/messages/en.json
 git commit -m "feat(demande): page publique /nouvelle-demande (soumission client)"
@@ -1267,6 +1404,7 @@ git commit -m "feat(demande): page publique /nouvelle-demande (soumission client
 ## Task 8 : Seed de démo (documents + email) + top-up cloud
 
 **Files:**
+
 - Modify: `supabase/seed.sql`
 - Create: `scripts/seed-onboarding-docs.mjs`
 - Modify: `package.json` (script `seed`)
@@ -1276,6 +1414,7 @@ git commit -m "feat(demande): page publique /nouvelle-demande (soumission client
 **Step 1 — Ajouter au `seed.sql`**
 
 Après le bloc `taches_correction` (vers la ligne 298), ajouter :
+
 ```sql
 -- ── Documents d'onboarding de démo (Brique 7bis) ─────────────────────────────
 -- Rattachés au client Barfoots (…-001), utilisé par les parcours e2e portail.
@@ -1303,6 +1442,7 @@ values
 **Step 2 — Créer le top-up idempotent cloud**
 
 Créer `scripts/seed-onboarding-docs.mjs` (calqué sur les autres `seed-*.mjs`) :
+
 ```js
 // Top-up idempotent des documents d'onboarding de démo (Brique 7bis).
 // Aligné sur supabase/seed.sql — sûr à rejouer (upsert par id). Service role.
@@ -1323,18 +1463,32 @@ const admin = createClient(url, key, {
 
 const BARFOOTS = "b0000000-0000-4000-8000-000000000001";
 const docs = [
-  { id: "a3000000-0000-4000-8000-000000000001", type: "bienvenue",
+  {
+    id: "a3000000-0000-4000-8000-000000000001",
+    type: "bienvenue",
     titre: "Bienvenue chez Natural Kiss — Barfoots of Botley Ltd",
-    contenu_html: "<h1>Bienvenue, Barfoots of Botley Ltd</h1><p>Votre espace client est actif.</p><p><strong>Accès&nbsp;:</strong> /portail/login</p>" },
-  { id: "a3000000-0000-4000-8000-000000000002", type: "certifs",
+    contenu_html:
+      "<h1>Bienvenue, Barfoots of Botley Ltd</h1><p>Votre espace client est actif.</p><p><strong>Accès&nbsp;:</strong> /portail/login</p>",
+  },
+  {
+    id: "a3000000-0000-4000-8000-000000000002",
+    type: "certifs",
     titre: "Nos certifications",
-    contenu_html: "<h1>Certifications Natural Kiss</h1><ul><li>GlobalG.A.P.</li><li>GRASP</li><li>BRCGS</li><li>SMETA</li><li>Sedex</li></ul>" },
-  { id: "a3000000-0000-4000-8000-000000000003", type: "produit",
+    contenu_html:
+      "<h1>Certifications Natural Kiss</h1><ul><li>GlobalG.A.P.</li><li>GRASP</li><li>BRCGS</li><li>SMETA</li><li>Sedex</li></ul>",
+  },
+  {
+    id: "a3000000-0000-4000-8000-000000000003",
+    type: "produit",
     titre: "Fiche produit & prochaines étapes — Tenderstem / Bimi",
-    contenu_html: "<h1>Tenderstem / Bimi → UK</h1><h2>Prochaines étapes</h2><ol><li>Validation des specs.</li><li>Booking.</li><li>Suivi du lot.</li></ol>" },
+    contenu_html:
+      "<h1>Tenderstem / Bimi → UK</h1><h2>Prochaines étapes</h2><ol><li>Validation des specs.</li><li>Booking.</li><li>Suivi du lot.</li></ol>",
+  },
 ].map((d) => ({ ...d, client_id: BARFOOTS, demande_id: null }));
 
-const { error } = await admin.from("documents_onboarding").upsert(docs, { onConflict: "id" });
+const { error } = await admin
+  .from("documents_onboarding")
+  .upsert(docs, { onConflict: "id" });
 if (error) {
   console.error("Seed documents_onboarding échoué :", error.message);
   process.exit(1);
@@ -1345,17 +1499,21 @@ console.log(`✓ ${docs.length} documents d'onboarding de démo (Barfoots).`);
 **Step 3 — Ajouter au script `seed` de `package.json`**
 
 Modifier la clé `"seed"` :
+
 ```json
     "seed": "node scripts/seed-storage.mjs && node scripts/seed-portail.mjs && node scripts/seed-planning.mjs && node scripts/seed-onboarding.mjs && node scripts/seed-booking.mjs && node scripts/seed-onboarding-docs.mjs",
 ```
 
 **Step 4 — Charger les données de démo sur le cloud**
+
 ```bash
 node scripts/seed-onboarding-docs.mjs
 ```
+
 Expected : `✓ 3 documents d'onboarding de démo (Barfoots).`
 
 **Step 5 — Commit**
+
 ```bash
 git add supabase/seed.sql scripts/seed-onboarding-docs.mjs package.json
 git commit -m "chore(seed): documents d'onboarding + email de démo (Barfoots)"
@@ -1366,12 +1524,14 @@ git commit -m "chore(seed): documents d'onboarding + email de démo (Barfoots)"
 ## Task 9 : Tests e2e
 
 **Files:**
+
 - Create: `tests/e2e/nouvelle-demande.spec.ts`
 - Modify: `tests/e2e/portail.spec.ts`
 
 **Step 1 — E2E page publique**
 
 Créer `tests/e2e/nouvelle-demande.spec.ts` :
+
 ```ts
 import { expect, test } from "@playwright/test";
 
@@ -1400,28 +1560,31 @@ test("un client soumet une demande depuis la page publique", async ({ page }) =>
 **Step 2 — E2E documents dans le portail**
 
 Dans `tests/e2e/portail.spec.ts`, ajouter à la fin (le helper `login` + les constantes `BARFOOTS_EMAIL` sont déjà définis dans le fichier) :
+
 ```ts
 test("le client voit sa section « Vos documents » (onboarding)", async ({ page }) => {
   await login(page, BARFOOTS_EMAIL);
   await page.goto("/portail");
   await expect(page).toHaveURL(/\/portail(\/)?$/);
 
-  await expect(
-    page.getByRole("heading", { name: /Vos documents/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Vos documents/ })).toBeVisible();
   // Document seedé pour Barfoots.
   await expect(page.getByText(/Nos certifications/)).toBeVisible();
 });
 ```
+
 > Prérequis : `node scripts/seed-onboarding-docs.mjs` a été exécuté (Task 8, Step 4).
 
 **Step 3 — Lancer les e2e**
+
 ```bash
 npm run test:e2e -- nouvelle-demande portail
 ```
+
 Expected : PASS. (Playwright lance le serveur dev via `playwright.config.ts`.)
 
 **Step 4 — Commit**
+
 ```bash
 git add tests/e2e/nouvelle-demande.spec.ts tests/e2e/portail.spec.ts
 git commit -m "test(e2e): page publique de demande + section documents du portail"
@@ -1432,19 +1595,23 @@ git commit -m "test(e2e): page publique de demande + section documents du portai
 ## Task 10 : Vérification finale + doc
 
 **Files:**
+
 - Modify: `README.md` (section Brique 7 / vérification — 2-3 lignes)
 
 **Step 1 — Suite complète**
+
 ```bash
 npm run lint && npm run typecheck && npm run format:check
 npm test
 npm run test:e2e
 ```
+
 Expected : tout PASS. Si `format:check` échoue : `npm run format` puis re-commit.
 
 **Step 2 — Note README**
 
 Dans `README.md`, à la section « 13. Vérification manuelle », ajouter un point :
+
 ```markdown
 4. `/nouvelle-demande` (public) → un client soumet « Brocoli / Tenderstem → UK » →
    confirmation neutre ; la demande apparaît sur `/demande` (interne) avec le pack
@@ -1453,15 +1620,18 @@ Dans `README.md`, à la section « 13. Vérification manuelle », ajouter un poi
 ```
 
 **Step 3 — Commit**
+
 ```bash
 git add README.md
 git commit -m "docs: parcours de vérification du MVP demande→onboarding→espace client"
 ```
 
 **Step 4 — Vérification manuelle (démo)**
+
 ```bash
 npm run dev
 ```
+
 - `/nouvelle-demande` → soumettre Mangue → UK, puis Brocoli / Tenderstem → UK.
 - `/demande` → la demande Brocoli est `Suffisant`, la demande Mangue `Insuffisant` (tâches) ; panneau « Emails envoyés » non vide ; cliquer « Créer l'espace client » sur la demande Brocoli.
 - Se connecter au portail (`/portail/login`) avec l'email utilisé → vérifier la section « Vos documents » et l'ouverture d'un document.
@@ -1471,6 +1641,7 @@ npm run dev
 ## Récapitulatif des fichiers
 
 **Créés :**
+
 - `supabase/migrations/0010_documents_onboarding.sql`
 - `src/lib/onboarding/documents.ts`
 - `src/app/portail/documents/[id]/page.tsx`
@@ -1482,6 +1653,7 @@ npm run dev
 - `tests/e2e/nouvelle-demande.spec.ts`
 
 **Modifiés :**
+
 - `src/lib/supabase/types.ts` (généré)
 - `src/lib/onboarding/service.ts`
 - `src/lib/onboarding/actions.ts`
@@ -1494,6 +1666,7 @@ npm run dev
 - `tests/e2e/portail.spec.ts`
 
 ## Principes respectés
+
 - **DRY** : réutilise `createDemande`/`matchDemande`/portail RLS ; aucun moteur dupliqué.
 - **YAGNI** : templates HTML simples, email mock, pas de PDF ni de raffinements Slack (sites, whitelist organismes, paliers) — notés « hors scope » dans le design.
 - **TDD** : logique pure (Task 2) et service (Task 3) écrits test-first ; RLS prouvée par intégration.

@@ -52,6 +52,7 @@ Approche **A** — étendre la Brique 7 en une tranche verticale complète. Quat
 fines :
 
 ### a) Page publique client — `/nouvelle-demande`
+
 Route **publique** (hors auth ; le `middleware.ts` ne fait que rafraîchir la session
 portail, il ne bloque rien). Formulaire minimal : société, email, **produit** (liste
 déroulante : Brocoli/Tenderstem, Patate douce, Fraise, Ail, Mangue…), **pays** (UK,
@@ -61,6 +62,7 @@ France, Pays-Bas, Russie…), volume optionnel. Server action → appelle le
 révèle pas le résultat du matching au client (comportement métier réel).
 
 ### b) Génération des documents à l'onboarding
+
 Extension de `onboardDemande()` : après création du client + accès portail, génération
 de **3 documents templates simples** (contenu HTML, placeholders réalistes) :
 
@@ -72,11 +74,13 @@ Persistés dans une nouvelle table **`documents_onboarding`** (client-scopée), 
 « envoyés » via un **email d'onboarding** (mock).
 
 ### c) Boîte d'envoi démo
+
 Les emails mockés (pack certif + onboarding) sont journalisés dans **`emails_envoyes`**
 et affichés dans un panneau **« Emails envoyés (démo) »** sur `/demande`. Rend l'envoi
 automatique **visible** sans vrai serveur mail.
 
 ### d) Espace client enrichi
+
 Section **« Vos documents »** sur `/portail` listant les documents d'onboarding du
 client (RLS), chacun ouvrable en page lisible/imprimable `/portail/documents/[id]`.
 Le suivi des lots reste affiché en dessous.

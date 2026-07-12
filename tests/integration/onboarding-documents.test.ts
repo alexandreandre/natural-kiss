@@ -21,10 +21,13 @@ const RUN = Date.now();
 const created = { demandeId: "", clientId: "", userId: "" };
 
 afterAll(async () => {
-  if (created.demandeId) await admin.from("emails_envoyes").delete().eq("demande_id", created.demandeId);
-  if (created.demandeId) await admin.from("demandes").delete().eq("id", created.demandeId);
+  if (created.demandeId)
+    await admin.from("emails_envoyes").delete().eq("demande_id", created.demandeId);
+  if (created.demandeId)
+    await admin.from("demandes").delete().eq("id", created.demandeId);
   if (created.clientId) await admin.from("clients").delete().eq("id", created.clientId); // cascade docs + client_users
-  if (created.userId) await admin.auth.admin.deleteUser(created.userId).catch(() => undefined);
+  if (created.userId)
+    await admin.auth.admin.deleteUser(created.userId).catch(() => undefined);
 });
 
 describe("Onboarding — documents & emails (Supabase)", () => {
@@ -55,7 +58,11 @@ describe("Onboarding — documents & emails (Supabase)", () => {
       .from("documents_onboarding")
       .select("type, titre")
       .eq("client_id", onboard.clientId);
-    expect((docs ?? []).map((d) => d.type).sort()).toEqual(["bienvenue", "certifs", "produit"]);
+    expect((docs ?? []).map((d) => d.type).sort()).toEqual([
+      "bienvenue",
+      "certifs",
+      "produit",
+    ]);
 
     const { data: onbMails } = await admin
       .from("emails_envoyes")
@@ -75,7 +82,9 @@ describe("Onboarding — documents & emails (Supabase)", () => {
     });
     expect(signErr).toBeNull();
 
-    const { data, error } = await c.from("documents_onboarding").select("id, client_id");
+    const { data, error } = await c
+      .from("documents_onboarding")
+      .select("id, client_id");
     expect(error).toBeNull();
     expect((data ?? []).length).toBe(3);
     expect((data ?? []).every((d) => d.client_id === created.clientId)).toBe(true);

@@ -40,7 +40,7 @@ export default async function PortailDocumentPage({
           {/* Contenu généré par nos propres gabarits (documents.ts) — pas d'entrée
               utilisateur libre non échappée : rendu HTML sûr. */}
           <div
-            className="max-w-none text-sm leading-relaxed [&_h1]:font-display [&_h1]:mb-3 [&_h1]:text-2xl [&_h1]:font-medium [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_p]:mb-2.5 [&_ul]:my-2"
+            className="[&_h1]:font-display max-w-none text-sm leading-relaxed [&_h1]:mb-3 [&_h1]:text-2xl [&_h1]:font-medium [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_p]:mb-2.5 [&_ul]:my-2"
             dangerouslySetInnerHTML={{ __html: doc.contenuHtml }}
           />
         </article>
