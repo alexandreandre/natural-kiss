@@ -1,60 +1,172 @@
 # Natural Kiss — Plateforme
 
-Outil de suivi **production-export** (fruits & légumes) augmenté par l'IA, construit
-**brique par brique** autour d'un objet central : le **lot** (shipment).
+Outil de suivi **production-export** (fruits & légumes) augmenté par l'IA, qui
+couvre **tout le flux** de Natural Kiss — du **premier contact client** jusqu'au
+**retour qualité et à la clôture financière** — construit **brique par brique**
+autour d'un objet central : le **lot** (shipment / conteneur).
 
-Briques livrées :
+> **Contexte métier** : Natural Kiss est un producteur-exportateur égyptien de
+> fruits & légumes vers l'Europe, le Royaume-Uni et la Russie (Tenderstem/Bimi
+> pour Barfoots, patate douce, plants « slips », ail, fraise, projet mangue).
+> L'outil répond à des **douleurs réelles** : incohérences documentaires,
+> certificats phytosanitaires refaits en boucle, détentions douanières, rejets
+> qualité, litiges financiers. Voir [`docs/`](#documents-de-conception).
 
-- **Brique 0 — Fondations** : squelette, socle de données (M0) Supabase, design
-  system bilingue, adaptateurs mock-first, feature flags, tests, CI.
-- **Brique 1 — P0 tracking (M7)** : tout le voyage d'un conteneur par son numéro.
-- **Brique 2 — Objet Lot** : liste filtrable + fiche 360°.
-- **Brique 3 ⭐ — Documents & Conformité + Gate (M6)** : dépôt de documents,
-  **vérificateur IA** de cohérence croisée, **checklist de conformité** pays/produit,
-  et **Gate « Check OK »** qui verrouille l'expédition jusqu'au tout-vert — au vert,
-  **mail (mock)** au client/broker, tracé.
-- **Brique 4 — Chargement & Portail client (M5 + T1)** : preuve produit au
-  chargement (photo boîte / QR), portail client isolé par RLS.
-- **Brique 5 — Dashboard & Planning (T3 + M3)** : KPIs de service, planning
-  prévu / réalisé.
-- **Brique 6 — Hub email & IA + Qualité client (T2 + M9)** : **import automatique
-  du PDF de retour** depuis les mails (mock `EmailProvider`), **analyse IA**
-  (`QcAnalyzerProvider` → défauts catégorisés, score, verdict, validés par Zod),
-  rattachement au lot par n° de conteneur, comparaison **photo boîte départ ↔
-  retour**, et **tendances qualité** par produit / client / site.
-- **Brique 7 — Demande & Onboarding + Certifications (M1 + M2 + M0c)** :
-  **onglet Demande** (produit × pays × client) avec **matching automatique des
-  certifications** contre le **coffre M0c** (`certifications`, couverture
-  produit/pays + validité). Suffisant → **envoi auto** (mock `EmailProvider`) du
-  pack + certifs ; insuffisant → **alerte + workflow de correction**
-  (`taches_correction`). Décision + raison **tracées** ; **alertes d'expiration**
-  des certifs ; **création de l'espace client** (Supabase Auth + `client_users`,
-  Brique 4).
-- **Brique 8 — Complétude du flux (M0b + M10 + T4 + T5)** : connecteur Cropwise
-  (traçabilité champ multi-sites), finance légère (paiements, litiges,
-  certificats de destruction), copilote IA (résumé de fils d'emails) et moteur
-  d'alertes proactives (retard navire, excursion température, document manquant).
-- **Brique 9 — Booking (M4)** : **dossier de réservation** généré en un clic
-  (texte standardisé, copiable vers n'importe quel canal — transporteur direct,
-  broker, transitaire, téléphone) et **point d'entrée unique de confirmation**
-  (n° de conteneur, transporteur, date de départ) qui fait naître le **lot** —
-  manuellement ou pré-rempli par lecture IA d'un mail de confirmation
-  (`BookingConfirmationProvider`). Réservation directe possible sans dossier
-  préalable (canal traité entièrement hors outil).
+---
 
-## Stack
+## 1. Le principe directeur : tout gravite autour du LOT
+
+Le point de départ de toute l'architecture : **le LOT (une expédition / un
+conteneur) est l'objet central**, suivi sur tout son cycle de vie. Chaque
+fonctionnalité vient s'accrocher à une **étape précise** de la chaîne.
+
+L'ensemble s'organise en **4 strates** clairement séparées :
+
+| Strate                 | Rôle                                                                                                 | Rythme                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------ |
+| 🗄️ **SOCLE permanent** | Données de référence (produits, clients, sites, certifications, traçabilité champ)                   | Toujours actif, alimente tout  |
+| 👤 **RAIL CLIENT**     | Cycle de la _relation_ : demande → onboarding → espace client                                        | **1 fois par client**          |
+| 📦 **RAIL LOT**        | Cycle de _l'expédition_ : booking → chargement → documents → transport → arrivée → qualité → clôture | **À chaque envoi**             |
+| 🔁 **TRANSVERSES**     | Portail client, hub email/IA, dashboard, copilot, alertes                                            | En **parallèle**, tout le long |
+
+> **Insight clé** : ne jamais mélanger le **niveau client** (rare : onboarder,
+> certifier) et le **niveau lot** (permanent : suivre un conteneur). C'est cette
+> séparation qui rend le système lisible.
+
+---
+
+## 2. Le flux complet (vue d'ensemble)
+
+```mermaid
+flowchart TB
+    subgraph SOCLE["🗄️ SOCLE PERMANENT (alimente tout)"]
+        M0["M0 · Référentiel / Master Data"]
+        M0b["M0b · Traçabilité champ (Cropwise)"]
+        M0c["M0c · Coffre certifications & docs"]
+    end
+
+    subgraph RAILC["👤 RAIL CLIENT (1 fois / client)"]
+        M1["M1 · Demande & Qualification"] --> M2["M2 · Onboarding & Specs"]
+    end
+
+    subgraph RAILL["📦 RAIL LOT (à chaque expédition)"]
+        M3["M3 · Commande & Planning"] --> M4["M4 · BOOKING ⚡"]
+        M4 --> M5["M5 · Conditionnement & Chargement"]
+        M5 --> M6["M6 · Documents & Conformité"]
+        M6 -->|GATE 'Check OK'| M7["M7 · Transport & Tracking ⭐"]
+        M7 --> M8["M8 · Arrivée & Douane"]
+        M8 --> M9["M9 · Réception & Qualité client"]
+        M9 --> M10["M10 · Finance & Clôture"]
+    end
+
+    subgraph TRANS["🔁 TRANSVERSES (parallèle)"]
+        T1["T1 · Portail client"]
+        T2["T2 · Hub email & IA"]
+        T3["T3 · Dashboard & KPIs"]
+        T4["T4 · Copilot IA"]
+        T5["T5 · Alertes & Notifications"]
+    end
+
+    M2 --> M3
+    SOCLE -.alimente.-> RAILC
+    SOCLE -.alimente.-> RAILL
+    TRANS -.observe & agit.-> RAILL
+```
+
+### Le verrou central : la « GATE Check OK » (entre M6 et M7)
+
+Le point névralgique du système est un **jalon formel de validation** entre les
+Documents/Conformité (M6) et le Transport (M7).
+
+> **Règle d'or : rien ne part tant que Documents + Conformité + Preuve produit
+> ne sont pas tous au vert.**
+
+C'est ce verrou, augmenté par l'IA, qui évite les douleurs réelles : n° de
+conteneur incohérent, factures « modifiées », certificats phytosanitaires
+refaits en boucle, détentions douanières pour thrips/_Bemisia_. Quand la gate
+passe au vert → **envoi automatique du mail** au client / broker.
+
+---
+
+## 3. Le parcours d'un lot, étape par étape
+
+1. **Demande client (M1)** — un client demande un produit X vers un pays Y.
+   Matching automatique des certifications (M0c) : si suffisant → envoi auto du
+   pack ; sinon → alerte + workflow de correction.
+2. **Onboarding (M2)** — la demande qualifiée devient un client actif ; création
+   de son **espace portail** (T1).
+3. **Planning (M3)** — la commande est planifiée semaine par semaine ; **import
+   de l'Excel existant** ; comparaison **prévu vs réalisé**.
+4. **Booking (M4) ⚡** — la **réservation de la ligne** est le déclencheur : elle
+   **fait naître le lot** (n° de conteneur) suivi par tout le reste.
+5. **Chargement (M5)** — QR / photo au chargement, **photo boîte** visible par le
+   client, installation du datalogger, QC départ.
+6. **Documents & Gate (M6)** — dépôt des documents, **vérificateur IA** de
+   cohérence croisée, **checklist de conformité** pays/produit, puis **Gate**.
+7. **Transport & Tracking (M7) ⭐** — **tout le voyage par n° de conteneur** :
+   timeline, position (MarineTraffic / FlightRadar), courbes température/humidité
+   (datalogger), **score de risque d'arrivée**.
+8. **Arrivée & Douane (M8)** — dédouanement, validation CHED, livraison.
+9. **Réception & Qualité (M9)** — **import automatique du PDF de retour** depuis
+   les mails, **analyse IA** des défauts, comparaison photo départ ↔ arrivée,
+   tendances par produit/client/site.
+10. **Finance & Clôture (M10)** — statut de paiement, cohérence facture, litiges
+    (cas Voltz), certificats de destruction.
+
+En parallèle : le **portail client (T1)**, le **hub email/IA (T2)**, le
+**dashboard (T3)**, le **copilot (T4)** et les **alertes (T5)** traversent tout
+le flux.
+
+---
+
+## 4. Briques livrées (modules → implémentation)
+
+La plateforme est construite en **tranches verticales** (UI → logique → données),
+**mock-first** : chaque source externe (MarineTraffic, FlightRadar, Cropwise,
+datalogger, email, LLM) est derrière un **adaptateur** avec une implémentation
+mock réaliste, basculable vers le réel **sans réécrire la brique**.
+
+| Brique                       | Modules          | Contenu                                                                                                            |
+| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **0 — Fondations**           | M0               | Socle de données Supabase, design system bilingue, adaptateurs mock, feature flags, tests, CI.                     |
+| **1 — Tracking ⭐P0**        | M7               | Tout le voyage d'un conteneur par son numéro : timeline, carte, capteurs, score de risque.                         |
+| **2 — Objet Lot**            | —                | Liste filtrable + fiche 360° (tracking, docs, qualité, origine).                                                   |
+| **3 — Documents & Gate ⭐**  | M6               | Dépôt docs, **vérificateur IA** de cohérence, **checklist conformité**, **Gate « Check OK »** → mail auto au vert. |
+| **4 — Chargement & Portail** | M5, T1           | Preuve produit (photo boîte / QR), portail client isolé par **RLS**.                                               |
+| **5 — Dashboard & Planning** | T3, M3           | KPIs (taux de service / retard), planning prévu/réalisé, import Excel.                                             |
+| **6 — Hub email & Qualité**  | T2, M9           | Import auto du PDF de retour, analyse IA des défauts, comparaison départ↔retour, tendances.                        |
+| **7 — Demande & Onboarding** | M1, M2, M0c      | Matching auto des certifs, envoi auto ou alerte+correction, coffre certifs, création espace client.                |
+| **8 — Complétude du flux**   | M0b, M10, T4, T5 | Connecteur Cropwise, finance (paiements/litiges), copilot IA, moteur d'alertes proactives.                         |
+| **9 — Booking**              | M4               | Dossier de réservation en un clic + point d'entrée unique de confirmation qui **fait naître le lot**.              |
+
+---
+
+## 5. Documents de conception
+
+Le dossier [`docs/`](docs/) contient les documents fondateurs (le _pourquoi_ et
+le _comment_ du produit) :
+
+| Document                                                                     | Contenu                                                                                                                                                              |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`docs/01-base-de-connaissance.md`](docs/01-base-de-connaissance.md)         | **Base de connaissance métier** : identité, produits, clients, chaîne logistique, qualité/conformité, douleurs réelles, chronologie. La matière première du produit. |
+| [`docs/02-architecture-plateforme.md`](docs/02-architecture-plateforme.md)   | **Architecture modulaire** : les 4 strates, les modules M0→M10 & T1→T5, la Gate, les intégrations externes, la feuille de route.                                     |
+| [`docs/03-strategie-implementation.md`](docs/03-strategie-implementation.md) | **Stratégie d'implémentation** : philosophie « tranches verticales, mock-first, à cliquet », stack, séquence des briques, stratégie de test, Definition of Done.     |
+
+---
+
+## 6. Stack
 
 Next.js 16 (App Router) · TypeScript strict · Tailwind v4 + shadcn/ui · Supabase
 (Postgres, Auth, Storage, RLS) via `supabase-js` typé · Zod · next-intl (FR/EN) ·
 Vitest · Playwright.
 
-## Prérequis
+## 7. Prérequis
 
 - **Node 20.9+**
 - **Docker** (pour Supabase en local)
 - **Supabase CLI** (`brew install supabase/tap/supabase` ou https://supabase.com/docs/guides/cli)
 
-## Démarrage rapide (Supabase local)
+## 8. Démarrage rapide (Supabase local)
 
 ```bash
 npm install
@@ -68,7 +180,7 @@ npm run dev                             # http://localhost:3000
 Pour `.env.local` en local, renseignez les valeurs affichées par `supabase status`
 (`API URL`, `anon key`, `service_role key`).
 
-## Brancher un projet Supabase **cloud**
+## 9. Brancher un projet Supabase **cloud**
 
 Aucun changement de code : seule la configuration diffère.
 
@@ -94,7 +206,7 @@ Aucun changement de code : seule la configuration diffère.
    `node scripts/seed-onboarding.mjs` (aligné sur `supabase/seed.sql`, inclus
    dans `npm run seed`).
 
-## Scripts npm
+## 10. Scripts npm
 
 | Script                                  | Rôle                                                                               |
 | --------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -113,36 +225,39 @@ Aucun changement de code : seule la configuration diffère.
 | `npm test`                              | Tests unitaires + intégration (Vitest, Supabase local)                             |
 | `npm run test:e2e`                      | Test E2E (Playwright)                                                              |
 
-## Architecture (Brique 0)
+## 11. Architecture du code
 
 ```
 src/
-  app/                     # App Router : layout (providers i18n/thème) + home
-  components/
-    brand/ layout/ home/ lots/ ui/   # design system + shadcn/ui
+  app/                     # App Router : une route par module (tracking, lots, gate,
+                           #   chargement, portail, dashboard, planning, qualite,
+                           #   demande, finance, alertes, copilot, booking)
+  components/              # design system + composants par module
   i18n/                    # next-intl (FR/EN, sans routing — locale via cookie)
   lib/
-    adapters/              # interfaces + mocks (Tracking/Sensor/FieldTrace/Email/Llm)
-    data/                  # accès données typé (lots)
-    supabase/              # clients (admin service-role, serveur anon, navigateur) + types générés
-    env.ts                 # validation Zod des variables d'environnement
+    adapters/              # interfaces + mocks (Tracking/Sensor/FieldTrace/Email/Llm/…)
+    <module>/              # logique par module : rules.ts (pur, testable),
+                           #   service.ts (accès données), actions.ts (server actions)
+    supabase/              # clients (admin service-role, serveur, navigateur) + types
     feature-flags.ts       # activation par module/brique
     modules.ts             # registre des modules (M0→M10, T1→T5)
 supabase/
-  migrations/              # 0001 schéma M0 + RLS + grants · 0002 buckets Storage
+  migrations/              # schéma versionné (0001 → 0009) + RLS + grants
   seed.sql                 # données de démo réalistes (dont cas « à problème »)
-scripts/seed-storage.mjs   # upload des PDF de démo dans Storage
-tests/                     # unit · integration · e2e
+scripts/                   # seed Storage + top-ups cloud idempotents
+tests/                     # unit · integration (Supabase local) · e2e (Playwright)
+docs/                      # documents de conception (base de connaissance, archi, stratégie)
 ```
 
 ### Le socle de données (M0)
 
-10 tables autour du lot : `clients`, `commandes`, `lots`, `transporteurs`,
+Tables autour du lot : `clients`, `commandes`, `lots`, `transporteurs`,
 `origines`, `documents`, `evenements_timeline`, `mesures_capteur`,
-`rapports_qualite`, `preuves_produit`. **RLS activée partout** (deny par défaut) ;
-l'accès interne passe par la **service role** (contourne la RLS) ; l'isolation
-client du portail (Brique 4) est préparée (`clients.portail_user_id`,
-fonction `public.current_client_id()`).
+`rapports_qualite`, `preuves_produit`, plus les tables des briques suivantes
+(gate, planning, qualité, onboarding, finance, booking…). **RLS activée partout**
+(deny par défaut) ; l'accès interne passe par la **service role** ; l'isolation
+client du portail (Brique 4) repose sur `clients.portail_user_id` et la fonction
+`public.current_client_id()`.
 
 Buckets Storage : `documents`, `preuves`, `retours-qc`.
 
@@ -152,120 +267,36 @@ Chaque source externe est derrière une interface, avec une implémentation `Moc
 par défaut (données calquées sur la base de connaissance) validée par Zod. Bascule
 vers le réel via `NK_<SOURCE>_PROVIDER=real`, **sans toucher aux briques**.
 
+| Adaptateur                                                   | Mock                    | Réel (quand prêt)             |
+| ------------------------------------------------------------ | ----------------------- | ----------------------------- |
+| `TrackingProvider`                                           | Route rejouée           | MarineTraffic / FlightRadar   |
+| `SensorProvider`                                             | Séries simulées         | Datalogger SIM / API capteurs |
+| `LlmProvider` / `QcAnalyzerProvider` / `DocVerifierProvider` | Réponses déterministes  | API LLM                       |
+| `EmailProvider`                                              | Boîte fictive           | IMAP / API mail               |
+| `FieldTraceProvider`                                         | Données champ fictives  | Cropwise                      |
+| `BookingConfirmationProvider`                                | Extraction déterministe | LLM                           |
+
 ### i18n
 
 FR (interne, défaut) + EN, via next-intl **sans routing** : la locale est stockée
 dans un cookie et se change depuis l'en-tête. Aucune duplication de routes.
 
-## Definition of Done — Brique 9 (Booking — M4)
+## 12. Tests & qualité
 
-- [x] Constat de cadrage : le **canal de réservation varie** (transporteur direct,
-      broker, transitaire, téléphone…) — l'outil ne l'impose pas. Séparation
-      **demande** (sortante, variable) / **confirmation** (entrante, un seul geste).
-- [x] `/booking` — **Nouvelle demande** : génère un **dossier de réservation**
-      standardisé (`demandes_booking.dossier_texte`, logique pure testable dans
-      `lib/booking/rules.ts`), copiable vers n'importe quel canal.
-- [x] **Registre des dossiers** (brouillon → envoyé → confirmé) : copier le
-      dossier, marquer envoyé, ou confirmer directement depuis la liste.
-- [x] **Point d'entrée unique de confirmation** (`confirmBooking`) : 3 champs
-      (n° de conteneur, transporteur, date de départ) → **crée le lot**
-      (`lots`, statut `booking`) et marque le dossier `confirme` — **idempotent**
-      (reconfirmer renvoie le lot déjà créé).
-- [x] **Transporteur inconnu** du référentiel (M0) → ajouté à la volée
-      (`resolveTransporteur`) : le canal étant trop variable pour une liste fermée.
-- [x] **Réservation directe** possible sans dossier préalable (canal traité
-      entièrement hors outil).
-- [x] **Pré-remplissage IA** de la confirmation : coller le texte d'un mail de
-      confirmation (peu importe l'expéditeur) → `BookingConfirmationProvider`
-      (mock déterministe → LLM réel) extrait n° conteneur / transporteur / date,
-      validé par Zod ; la saisie manuelle reste toujours prioritaire.
-- [x] Migration SQL `0009` (`demandes_booking` + enum `booking_statut`) + **RLS** ;
-      types TS régénérés (cloud) ; `seed.sql` + `scripts/seed-booking.mjs` (cloud)
-      enrichis (3 dossiers : brouillon SHP mangue, envoyé Barfoots Tenderstem,
-      confirmé Exo3 ail → déjà lié à `LOT-2026-0005`).
-- [x] Tests **unitaires** (dossier généré, référence de lot, extraction IA mock) +
-      **intégration** (création → confirmation → idempotence → transporteur
-      ajouté) + **3 E2E** (registre, nouvelle demande, réservation directe).
-- [x] `lint`, `typecheck`, tests verts ; feature flag `BOOKING` ; aucune régression.
+- **Unitaires (Vitest)** : logique métier pure (score de risque, cohérence
+  documentaire, matching certifs, KPI retard, règles de gate…).
+- **Intégration (Vitest + Supabase local)** : flux de données + règles **RLS**.
+- **E2E (Playwright)** : un parcours par brique (le critère de démonstrabilité).
+- **CI** : `lint + typecheck + format:check` puis tests sur Supabase local à
+  chaque commit.
 
-> Bascule vers un vrai LLM : `NK_LLM_PROVIDER=real` (adaptateur), sans toucher
-> à la brique.
+> **Definition of Done** d'une brique (cf.
+> [`docs/03-strategie-implementation.md`](docs/03-strategie-implementation.md)) :
+> fonctionnalité de bout en bout, adaptateurs mock, migration + RLS + types,
+> `seed.sql` enrichi (dont cas « à problème »), tests unit + intégration + 1 E2E,
+> feature flag, aucune régression.
 
-## Definition of Done — Brique 7 (Demande & Onboarding + Certifications)
-
-- [x] **Onglet Demande** (`/demande`) : réception d'une demande (produit × pays ×
-      client) + qualification automatique.
-- [x] **Coffre certifications (M0c)** `certifications` : GGAP, GRASP, BRCGS, SMETA,
-      Sedex avec couverture produit/pays + validité ; **alertes d'expiration**.
-- [x] **Matching auto** (logique pure, testable) : « mangue → UK » → **manque
-      GGAP/GRASP mangue** → alerte + **workflow de correction** (`taches_correction`) ;
-      « brocoli → UK » → certifs OK → **envoi auto** (mock `EmailProvider`) du pack.
-- [x] **Traçabilité** de la décision (suffisant / insuffisant + raison) en base ;
-      matching **strictement** basé sur la table `certifications` (pas d'invention).
-- [x] **Onboarding (M2)** : création de l'espace client (Supabase Auth +
-      `client_users`, Brique 4), idempotente.
-- [x] Migration SQL `0007` + **RLS** ; types TS régénérés ; `seed.sql` enrichi
-      (coffre + demande « mangue → UK ») + `scripts/seed-onboarding.mjs` (cloud).
-- [x] Tests **unitaires** (matching, couverture, expiration) + **intégration**
-      (demande → décision → envoi/alerte → onboarding) + **1 E2E** (`/demande`).
-- [x] `lint`, `typecheck`, tests verts ; feature flag `ONBOARDING` ; aucune régression.
-
-> Bascule vers une vraie boîte mail : `NK_EMAIL_PROVIDER=real` (adaptateur), sans
-> toucher à la brique.
-
-## Definition of Done — Brique 6 (Hub email & IA + Qualité client)
-
-- [x] Un mail mock avec PDF → **PDF importé et rattaché au lot** (par n° de
-      conteneur / réf. dans le sujet ou le nom du fichier), tracé dans
-      `qualite_imports` — **idempotent** (clé `email_id`).
-- [x] **Analyse IA** (`QcAnalyzerProvider` mock déterministe → LLM réel) validée
-      par Zod : `QCCheck_986640` → défauts « floraison / tiges creuses », score
-      **84**, flag **rouge** ; défauts catégorisés (aspect/maturité/calibre/…) +
-      sévérité, stockés dans `rapports_qualite.analyse_ia`.
-- [x] Comparaison **photo boîte départ (Brique 4) ↔ retour arrivée** dans la fiche
-      lot (onglet Qualité).
-- [x] **Tendances qualité** par produit / client / site (`/qualite`) : répartition
-      des verdicts, score moyen, défauts récurrents.
-- [x] Migration SQL `0006` + **RLS** ; types TS régénérés ; `seed.sql` enrichi
-      (analyses calquées sur les vrais PDF QC).
-- [x] Tests **unitaires** (extraction réf. / verdict / scoring / tendances) +
-      **intégration** (import → analyse → fiche → tendances, idempotence) +
-      **1 E2E** (mail → analyse → fiche lot).
-- [x] `lint`, `typecheck`, tests verts ; aucune régression.
-
-> Bascule vers un vrai LLM / une vraie boîte mail : `NK_LLM_PROVIDER=real` et
-> `NK_EMAIL_PROVIDER=real` (adaptateurs), sans toucher aux briques.
-
-## Definition of Done — Brique 3 (Documents & Conformité + Gate) ⭐
-
-- [x] Dépôt de documents par lot (upload Storage + rattachement + métadonnées).
-- [x] **Vérificateur IA** (`DocVerifierProvider` mock déterministe → LLM réel) :
-      cohérence croisée (n° conteneur, poids, code HS, quantités) → anomalies
-      **validées par Zod**.
-- [x] **Checklist de conformité** pays/produit : Déclaration Additionnelle UE,
-      règlement (UE) 2021/2285 (slips), code HS, couverture GGAP/GRASP, preuve produit.
-- [x] **Gate « Check OK »** : vue `lot_gate_status` (vert/rouge/en_attente) ; bloque
-      tant qu'anomalie bloquante ou conformité en échec.
-- [x] Au vert → **mail (mock)** au client/broker via `EmailProvider`, tracé dans
-      `gate_journal`.
-- [x] Migration SQL + **RLS** ; types TS régénérés ; `seed.sql` enrichi (jeu cohérent
-      → vert, jeu incohérent → rouge, Déclaration Additionnelle manquante).
-- [x] Tests **unitaires** (cohérence + conformité + statut) + **intégration** + **1 E2E**
-      (dépôt → anomalie → blocage ; cohérent → vert + mail).
-- [x] `lint`, `typecheck`, `format` OK ; aucune régression.
-
-## Definition of Done — Brique 0
-
-- [x] L'app démarre et affiche la home, connectée à Supabase.
-- [x] Migrations SQL créent le schéma M0 ; **RLS activée** ; types TS générés.
-- [x] `db:reset` applique migrations + `seed.sql` (dont cas « à problème ») + Storage.
-- [x] Interfaces d'adaptateurs + implémentations mock en place.
-- [x] Feature flags fonctionnels.
-- [x] `lint`, `typecheck`, tests unitaires + intégration verts.
-- [x] 1 test E2E « l'app charge et lit un lot depuis Supabase ».
-- [x] README technique présent.
-
-## Vérification manuelle
+## 13. Vérification manuelle
 
 1. `npm run db` puis `npm run db:reset` → base peuplée (Supabase Studio local :
    http://127.0.0.1:54323).
