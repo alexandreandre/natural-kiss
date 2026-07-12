@@ -13,10 +13,12 @@ import {
   type ExpirationAlert,
   type MatchResult,
 } from "@/lib/onboarding/rules";
+import { buildOnboardingDocuments } from "@/lib/onboarding/documents";
 
 type DemandeStatut = Database["public"]["Enums"]["demande_statut"];
 type DemandeDecision = Database["public"]["Enums"]["demande_decision"];
 type TacheStatut = Database["public"]["Enums"]["tache_statut"];
+type EmailCategorie = Database["public"]["Enums"]["email_categorie"];
 
 // ── Formes de lecture pour l'UI ──────────────────────────────────────────────
 
@@ -216,6 +218,29 @@ export interface CreateDemandeResult {
   tachesCreees: number;
 }
 
+/** Journalise un email « envoyé » (mock) pour la boîte d'envoi démo. */
+async function logEmailEnvoye(
+  supabase: ReturnType<typeof createAdminClient>,
+  row: {
+    categorie: EmailCategorie;
+    to: string;
+    subject: string;
+    body: string;
+    demandeId?: string | null;
+    clientId?: string | null;
+  },
+): Promise<void> {
+  const { error } = await supabase.from("emails_envoyes").insert({
+    categorie: row.categorie,
+    to_email: row.to,
+    subject: row.subject,
+    body: row.body,
+    demande_id: row.demandeId ?? null,
+    client_id: row.clientId ?? null,
+  });
+  if (error) throw new Error(`Journalisation email impossible : ${error.message}`);
+}
+
 /**
  * Reçoit une demande, exécute le matching des certifications (M0c) et applique
  * la logique automatique :
@@ -241,19 +266,17 @@ export async function createDemande(
   const statut: DemandeStatut = suffisant ? "envoyee" : "en_correction";
 
   // 1) Envoi automatique du pack (mock) au vert, avant persistance du timestamp.
+  const destinataire = input.contactEmail?.trim() || "contact@natural-kiss.com";
+  const packSubject = `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`;
+  const packBody =
+    `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
+    `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
+    `(${match.couvertes.map((t) => CERTIF_LABELS[t]).join(", ")}), toutes valides ` +
+    `et couvrant ce produit / marché.\n\nBien cordialement,\nNatural Kiss`;
   let mailSent = false;
   let packEnvoyeAt: string | null = null;
   if (suffisant) {
-    const destinataire = input.contactEmail?.trim() || null;
-    await getEmailProvider().send({
-      to: destinataire ? [destinataire] : ["contact@natural-kiss.com"],
-      subject: `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`,
-      body:
-        `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
-        `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
-        `(${match.couvertes.map((t) => CERTIF_LABELS[t]).join(", ")}), toutes valides ` +
-        `et couvrant ce produit / marché.\n\nBien cordialement,\nNatural Kiss`,
-    });
+    await getEmailProvider().send({ to: [destinataire], subject: packSubject, body: packBody });
     mailSent = true;
     packEnvoyeAt = new Date().toISOString();
   }
@@ -280,6 +303,18 @@ export async function createDemande(
 
   if (error) throw new Error(`Création de la demande impossible : ${error.message}`);
   const demandeId = inserted.id;
+
+  // Journalise le pack envoyé (démo : rend l'envoi automatique visible côté interne).
+  if (suffisant) {
+    await logEmailEnvoye(supabase, {
+      categorie: "pack_certif",
+      to: destinataire,
+      subject: packSubject,
+      body: packBody,
+      demandeId,
+      clientId: input.clientId ?? null,
+    });
+  }
 
   // 3) Workflow de correction si insuffisant.
   let tachesCreees = 0;
@@ -308,6 +343,7 @@ export interface OnboardResult {
   userId: string;
   email: string;
   alreadyExisted: boolean;
+  documentsCreated: number;
 }
 
 function slugEmail(clientNom: string): string {
@@ -349,7 +385,7 @@ export async function onboardDemande(demandeId: string): Promise<OnboardResult> 
   const { data: demande, error: dErr } = await supabase
     .from("demandes")
     .select(
-      "id, client_id, client_nom, contact_email, pays, decision, espace_client_cree",
+      "id, client_id, client_nom, contact_email, produit, pays, decision, espace_client_cree, certifs_requises",
     )
     .eq("id", demandeId)
     .maybeSingle();
@@ -412,5 +448,46 @@ export async function onboardDemande(demandeId: string): Promise<OnboardResult> 
     .eq("id", demandeId);
   if (upErr) throw new Error(`Mise à jour de la demande impossible : ${upErr.message}`);
 
-  return { clientId, userId, email, alreadyExisted };
+  // 5) Documents d'onboarding + email (idempotent : une seule fois par demande).
+  let documentsCreated = 0;
+  if (!demande.espace_client_cree) {
+    const drafts = buildOnboardingDocuments({
+      clientNom: demande.client_nom,
+      produit: demande.produit,
+      paysCode: demande.pays,
+      certifsLabels: demande.certifs_requises ?? [],
+    });
+    const { error: docErr } = await supabase
+      .from("documents_onboarding")
+      .upsert(
+        drafts.map((d) => ({
+          client_id: clientId,
+          demande_id: demandeId,
+          type: d.type,
+          titre: d.titre,
+          contenu_html: d.contenuHtml,
+        })),
+        { onConflict: "demande_id,type" },
+      );
+    if (docErr) throw new Error(`Création des documents impossible : ${docErr.message}`);
+    documentsCreated = drafts.length;
+
+    const onbSubject = "Natural Kiss — bienvenue & accès à votre espace client";
+    const onbBody =
+      `Bonjour,\n\nVotre espace client Natural Kiss est prêt. Vous y suivrez vos ` +
+      `lots, documents et statuts.\n\nDocuments joints :\n` +
+      drafts.map((d) => `• ${d.titre}`).join("\n") +
+      `\n\nConnexion à votre espace : /portail/login\n\nBien cordialement,\nNatural Kiss`;
+    await getEmailProvider().send({ to: [email], subject: onbSubject, body: onbBody });
+    await logEmailEnvoye(supabase, {
+      categorie: "onboarding",
+      to: email,
+      subject: onbSubject,
+      body: onbBody,
+      demandeId,
+      clientId,
+    });
+  }
+
+  return { clientId, userId, email, alreadyExisted, documentsCreated };
 }

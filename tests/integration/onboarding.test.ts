@@ -18,6 +18,7 @@ const created = {
 afterAll(async () => {
   const supabase = createAdminClient();
   for (const id of created.demandeIds) {
+    await supabase.from("emails_envoyes").delete().eq("demande_id", id);
     await supabase.from("demandes").delete().eq("id", id); // cascade → taches
   }
   for (const id of created.clientIds) {
