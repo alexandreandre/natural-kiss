@@ -218,3 +218,52 @@ export async function getMyLotDetail(lotId: string): Promise<PortailLotDetail> {
     })),
   };
 }
+
+export interface PortailOnboardingDoc {
+  id: string;
+  type: Database["public"]["Enums"]["document_onboarding_type"];
+  titre: string;
+  createdAt: string;
+}
+
+/** Documents d'onboarding du client connecté (RLS : uniquement les siens). */
+export async function listMyDocuments(): Promise<PortailOnboardingDoc[]> {
+  const supabase = await createServerAnonClient();
+  const { data, error } = await supabase
+    .from("documents_onboarding")
+    .select("id, type, titre, created_at")
+    .order("type", { ascending: true });
+  if (error) throw new Error(`Lecture des documents impossible : ${error.message}`);
+  return (data ?? []).map((d) => ({
+    id: d.id,
+    type: d.type,
+    titre: d.titre,
+    createdAt: d.created_at,
+  }));
+}
+
+export interface PortailOnboardingDocDetail extends PortailOnboardingDoc {
+  contenuHtml: string;
+}
+
+/** Un document d'onboarding du client connecté (RLS). `null` si inaccessible. */
+export async function getMyDocument(
+  id: string,
+): Promise<PortailOnboardingDocDetail | null> {
+  const supabase = await createServerAnonClient();
+  const { data, error } = await supabase
+    .from("documents_onboarding")
+    .select("id, type, titre, contenu_html, created_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Lecture du document impossible : ${error.message}`);
+  return data
+    ? {
+        id: data.id,
+        type: data.type,
+        titre: data.titre,
+        contenuHtml: data.contenu_html,
+        createdAt: data.created_at,
+      }
+    : null;
+}

@@ -501,6 +501,13 @@
     "empty": "Aucun lot ne vous est rattaché pour l'instant.",
     "backToLots": "Mes lots",
     "notFound": "Ce lot n'existe pas ou ne vous est pas accessible.",
+    "documentsTitle": "Vos documents",
+    "documentsEmpty": "Aucun document pour l'instant.",
+    "documentType": {
+      "bienvenue": "Bienvenue",
+      "certifs": "Certifications",
+      "produit": "Fiche produit"
+    },
     "login": {
       "kicker": "Portail client",
       "title": "Connexion à votre espace",

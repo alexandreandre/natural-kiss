@@ -501,6 +501,13 @@
     "empty": "No shipment is attached to you yet.",
     "backToLots": "My shipments",
     "notFound": "This shipment does not exist or is not accessible to you.",
+    "documentsTitle": "Your documents",
+    "documentsEmpty": "No document yet.",
+    "documentType": {
+      "bienvenue": "Welcome",
+      "certifs": "Certifications",
+      "produit": "Product sheet"
+    },
     "login": {
       "kicker": "Customer portal",
       "title": "Sign in to your space",

@@ -1,11 +1,11 @@
-import { ArrowUpRight, PackageSearch } from "lucide-react";
+import { ArrowUpRight, FileText, PackageSearch } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LotStatusBadge } from "@/components/lots/lot-status-badge";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { listMyLots } from "@/lib/portail/data";
+import { listMyLots, listMyDocuments } from "@/lib/portail/data";
 import { requirePortailContext } from "@/lib/portail/session";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +17,7 @@ export default async function PortailHomePage() {
   const t = await getTranslations("portail");
   const format = await getFormatter();
   const lots = await listMyLots();
+  const docs = await listMyDocuments();
 
   return (
     <div>
@@ -70,6 +71,34 @@ export default async function PortailHomePage() {
                     )}
                   </div>
                   <LotStatusBadge statut={l.statut} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-muted-foreground/70 mb-3 font-mono text-[10px] tracking-[0.14em] uppercase">
+          {t("documentsTitle")}
+        </h2>
+        {docs.length === 0 ? (
+          <div className="border-border rounded-[4px] border border-dashed p-6 text-center">
+            <p className="text-muted-foreground text-sm">{t("documentsEmpty")}</p>
+          </div>
+        ) : (
+          <ul className="divide-border/60 border-border divide-y rounded-[4px] border">
+            {docs.map((d) => (
+              <li key={d.id}>
+                <Link
+                  href={`/portail/documents/${d.id}`}
+                  className="hover:bg-accent/40 flex items-center gap-3 px-4 py-3.5 transition-colors"
+                >
+                  <FileText className="text-muted-foreground/70 size-4 shrink-0" />
+                  <span className="text-sm font-medium">{d.titre}</span>
+                  <span className="text-muted-foreground/60 ml-auto font-mono text-[10px] tracking-[0.12em] uppercase">
+                    {t(`documentType.${d.type}`)}
+                  </span>
                 </Link>
               </li>
             ))}
