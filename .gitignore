@@ -50,3 +50,10 @@ next-env.d.ts
 # supabase (local, temporaire)
 supabase/.branches
 supabase/.temp
+
+# Export Slack (scripts/slack-pull) : venv Python, caches, sorties locales
+scripts/.venv/
+__pycache__/
+*.pyc
+tmp/
+!.env.example
