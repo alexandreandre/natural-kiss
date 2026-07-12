@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
       alertes: {
@@ -602,6 +607,102 @@ export type Database = {
             columns: ["lot_id"]
             isOneToOne: false
             referencedRelation: "lots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents_onboarding: {
+        Row: {
+          client_id: string
+          contenu_html: string
+          created_at: string
+          demande_id: string | null
+          id: string
+          titre: string
+          type: Database["public"]["Enums"]["document_onboarding_type"]
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          contenu_html: string
+          created_at?: string
+          demande_id?: string | null
+          id?: string
+          titre: string
+          type: Database["public"]["Enums"]["document_onboarding_type"]
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          contenu_html?: string
+          created_at?: string
+          demande_id?: string | null
+          id?: string
+          titre?: string
+          type?: Database["public"]["Enums"]["document_onboarding_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_onboarding_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emails_envoyes: {
+        Row: {
+          body: string
+          categorie: Database["public"]["Enums"]["email_categorie"]
+          client_id: string | null
+          created_at: string
+          demande_id: string | null
+          id: string
+          subject: string
+          to_email: string
+        }
+        Insert: {
+          body: string
+          categorie: Database["public"]["Enums"]["email_categorie"]
+          client_id?: string | null
+          created_at?: string
+          demande_id?: string | null
+          id?: string
+          subject: string
+          to_email: string
+        }
+        Update: {
+          body?: string
+          categorie?: Database["public"]["Enums"]["email_categorie"]
+          client_id?: string | null
+          created_at?: string
+          demande_id?: string | null
+          id?: string
+          subject?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emails_envoyes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emails_envoyes_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes"
             referencedColumns: ["id"]
           },
         ]
@@ -1396,6 +1497,7 @@ export type Database = {
       conformite_statut: "ok" | "manquant" | "non_conforme" | "non_applicable"
       demande_decision: "en_attente" | "suffisant" | "insuffisant"
       demande_statut: "recue" | "envoyee" | "en_correction" | "cloturee"
+      document_onboarding_type: "bienvenue" | "certifs" | "produit"
       document_statut: "recu" | "verifie" | "anomalie"
       document_type:
         | "facture"
@@ -1405,6 +1507,7 @@ export type Database = {
         | "certificat_origine"
         | "ched_pp"
         | "autre"
+      email_categorie: "pack_certif" | "onboarding"
       evenement_code:
         | "booking"
         | "loading"
@@ -1579,6 +1682,7 @@ export const Constants = {
       conformite_statut: ["ok", "manquant", "non_conforme", "non_applicable"],
       demande_decision: ["en_attente", "suffisant", "insuffisant"],
       demande_statut: ["recue", "envoyee", "en_correction", "cloturee"],
+      document_onboarding_type: ["bienvenue", "certifs", "produit"],
       document_statut: ["recu", "verifie", "anomalie"],
       document_type: [
         "facture",
@@ -1589,6 +1693,7 @@ export const Constants = {
         "ched_pp",
         "autre",
       ],
+      email_categorie: ["pack_certif", "onboarding"],
       evenement_code: [
         "booking",
         "loading",
@@ -1627,4 +1732,3 @@ export const Constants = {
     },
   },
 } as const
-
