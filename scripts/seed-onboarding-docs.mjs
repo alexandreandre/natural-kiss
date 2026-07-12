@@ -47,4 +47,21 @@ if (error) {
   console.error("Seed documents_onboarding échoué :", error.message);
   process.exit(1);
 }
-console.log(`✓ ${docs.length} documents d'onboarding de démo (Barfoots).`);
+
+// Email de démo (boîte d'envoi) — aligné sur seed.sql, upsert idempotent par id.
+const { error: emailErr } = await admin.from("emails_envoyes").upsert(
+  {
+    id: "a4000000-0000-4000-8000-000000000001",
+    categorie: "onboarding",
+    to_email: "portail-barfoots@demo.natural-kiss.com",
+    subject: "Natural Kiss — bienvenue & accès à votre espace client",
+    body: "Bonjour, votre espace client est prêt. Documents joints : bienvenue, certifications, fiche produit.",
+    client_id: BARFOOTS,
+  },
+  { onConflict: "id" },
+);
+if (emailErr) {
+  console.error("Seed emails_envoyes échoué :", emailErr.message);
+  process.exit(1);
+}
+console.log(`✓ ${docs.length} documents + 1 email d'onboarding de démo (Barfoots).`);

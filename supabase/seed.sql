@@ -312,9 +312,9 @@ values
    '<h1>Tenderstem / Bimi → UK</h1><h2>Prochaines étapes</h2><ol><li>Validation des specs.</li><li>Booking.</li><li>Suivi du lot.</li></ol>');
 
 -- ── Email de démo (boîte d'envoi) ────────────────────────────────────────────
-insert into public.emails_envoyes (categorie, to_email, subject, body, client_id)
+insert into public.emails_envoyes (id, categorie, to_email, subject, body, client_id)
 values
-  ('onboarding', 'portail-barfoots@demo.natural-kiss.com',
+  ('a4000000-0000-4000-8000-000000000001', 'onboarding', 'portail-barfoots@demo.natural-kiss.com',
    'Natural Kiss — bienvenue & accès à votre espace client',
    'Bonjour, votre espace client est prêt. Documents joints : bienvenue, certifications, fiche produit.',
    'b0000000-0000-4000-8000-000000000001');

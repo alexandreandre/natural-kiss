@@ -88,11 +88,17 @@ export interface PublicDemandeActionResult {
 export async function submitPublicDemandeAction(
   formData: FormData,
 ): Promise<PublicDemandeActionResult> {
-  const clientNom = String(formData.get("clientNom") ?? "").trim();
-  const produit = String(formData.get("produit") ?? "").trim();
-  const pays = String(formData.get("pays") ?? "").trim();
-  const contactEmail = String(formData.get("contactEmail") ?? "").trim() || null;
-  const volume = String(formData.get("volume") ?? "").trim() || null;
+  // Endpoint public non authentifié : on borne la longueur des champs libres
+  // pour éviter tout gonflement de lignes (défense minimale, MVP).
+  const cap = (v: FormDataEntryValue | null, n: number) =>
+    String(v ?? "")
+      .trim()
+      .slice(0, n);
+  const clientNom = cap(formData.get("clientNom"), 200);
+  const produit = cap(formData.get("produit"), 120);
+  const pays = cap(formData.get("pays"), 60);
+  const contactEmail = cap(formData.get("contactEmail"), 200) || null;
+  const volume = cap(formData.get("volume"), 120) || null;
 
   if (!clientNom || !produit || !pays) {
     return { ok: false, error: "Société, produit et pays sont requis." };

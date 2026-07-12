@@ -290,7 +290,10 @@ export async function createDemande(
 
   // 1) Envoi automatique du pack (mock) au vert, avant persistance du timestamp.
   const destinataire = input.contactEmail?.trim() || "contact@natural-kiss.com";
-  const packSubject = `Natural Kiss — pack de présentation & certifications (${input.produit} → ${match.paysCode})`;
+  // Neutralise toute injection d'en-tête (CR/LF) dans le sujet — utile dès qu'un
+  // vrai fournisseur email remplacera le mock (NK_EMAIL_PROVIDER=real).
+  const produitSujet = input.produit.replace(/[\r\n]+/g, " ");
+  const packSubject = `Natural Kiss — pack de présentation & certifications (${produitSujet} → ${match.paysCode})`;
   const packBody =
     `Bonjour,\n\nSuite à votre demande (${input.produit} → ${match.paysCode}), ` +
     `veuillez trouver notre pack de présentation ainsi que nos certifications ` +
@@ -468,14 +471,10 @@ export async function onboardDemande(demandeId: string): Promise<OnboardResult> 
     );
   if (linkErr) throw new Error(`Liaison client_users impossible : ${linkErr.message}`);
 
-  // 4) Marque la demande onboardée.
-  const { error: upErr } = await supabase
-    .from("demandes")
-    .update({ client_id: clientId, espace_client_cree: true, statut: "cloturee" })
-    .eq("id", demandeId);
-  if (upErr) throw new Error(`Mise à jour de la demande impossible : ${upErr.message}`);
-
-  // 5) Documents d'onboarding + email (idempotent : une seule fois par demande).
+  // 4) Documents d'onboarding + email — AVANT de marquer la demande onboardée.
+  //    Ordre volontaire : si cette étape échoue, `espace_client_cree` reste false
+  //    et un retry régénère (upsert idempotent) — les documents ne sont jamais
+  //    silencieusement perdus. La garde s'appuie sur la valeur lue en tête.
   let documentsCreated = 0;
   if (!demande.espace_client_cree) {
     const drafts = buildOnboardingDocuments({
@@ -514,6 +513,13 @@ export async function onboardDemande(demandeId: string): Promise<OnboardResult> 
       clientId,
     });
   }
+
+  // 5) Marque la demande onboardée, une fois les artefacts effectivement créés.
+  const { error: upErr } = await supabase
+    .from("demandes")
+    .update({ client_id: clientId, espace_client_cree: true, statut: "cloturee" })
+    .eq("id", demandeId);
+  if (upErr) throw new Error(`Mise à jour de la demande impossible : ${upErr.message}`);
 
   return { clientId, userId, email, alreadyExisted, documentsCreated };
 }

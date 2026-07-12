@@ -30,7 +30,8 @@ function escapeHtml(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export function buildOnboardingDocuments(
@@ -47,7 +48,7 @@ export function buildOnboardingDocuments(
   return [
     {
       type: "bienvenue",
-      titre: `Bienvenue chez Natural Kiss — ${input.clientNom}`,
+      titre: `Bienvenue chez Natural Kiss — ${nom}`,
       contenuHtml:
         `<h1>Bienvenue, ${nom}</h1>` +
         `<p>Nous sommes ravis de démarrer notre collaboration pour ${produit} → ${pays}.</p>` +
@@ -67,7 +68,7 @@ export function buildOnboardingDocuments(
     },
     {
       type: "produit",
-      titre: `Fiche produit & prochaines étapes — ${input.produit}`,
+      titre: `Fiche produit & prochaines étapes — ${produit}`,
       contenuHtml:
         `<h1>${produit} → ${pays}</h1>` +
         `<h2>Prochaines étapes</h2>` +
