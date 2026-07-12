@@ -19,7 +19,7 @@
     "db:push": "supabase db push",
     "types": "supabase gen types typescript --local --schema public > src/lib/supabase/types.ts",
     "types:cloud": "supabase gen types typescript --linked --schema public > src/lib/supabase/types.ts",
-    "seed": "node scripts/seed-storage.mjs && node scripts/seed-portail.mjs && node scripts/seed-planning.mjs && node scripts/seed-onboarding.mjs && node scripts/seed-booking.mjs"
+    "seed": "node scripts/seed-storage.mjs && node scripts/seed-portail.mjs && node scripts/seed-planning.mjs && node scripts/seed-onboarding.mjs && node scripts/seed-booking.mjs && node scripts/seed-onboarding-docs.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

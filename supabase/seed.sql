@@ -297,6 +297,28 @@ values
   ('a2000000-0000-4000-8000-000000000001', 'grasp', 'Mangue', 'UK',
    'Obtenir/étendre GRASP — GRASP ne couvre pas Mangue → UK.', 'a_faire');
 
+-- ── Documents d'onboarding de démo (Brique 7bis) ─────────────────────────────
+-- Rattachés au client Barfoots (…-001), utilisé par les parcours e2e portail.
+insert into public.documents_onboarding (id, client_id, demande_id, type, titre, contenu_html)
+values
+  ('a3000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', null,
+   'bienvenue', 'Bienvenue chez Natural Kiss — Barfoots of Botley Ltd',
+   '<h1>Bienvenue, Barfoots of Botley Ltd</h1><p>Votre espace client est actif.</p><p><strong>Accès&nbsp;:</strong> /portail/login</p>'),
+  ('a3000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000001', null,
+   'certifs', 'Nos certifications',
+   '<h1>Certifications Natural Kiss</h1><ul><li>GlobalG.A.P.</li><li>GRASP</li><li>BRCGS</li><li>SMETA</li><li>Sedex</li></ul>'),
+  ('a3000000-0000-4000-8000-000000000003', 'b0000000-0000-4000-8000-000000000001', null,
+   'produit', 'Fiche produit & prochaines étapes — Tenderstem / Bimi',
+   '<h1>Tenderstem / Bimi → UK</h1><h2>Prochaines étapes</h2><ol><li>Validation des specs.</li><li>Booking.</li><li>Suivi du lot.</li></ol>');
+
+-- ── Email de démo (boîte d'envoi) ────────────────────────────────────────────
+insert into public.emails_envoyes (categorie, to_email, subject, body, client_id)
+values
+  ('onboarding', 'portail-barfoots@demo.natural-kiss.com',
+   'Natural Kiss — bienvenue & accès à votre espace client',
+   'Bonjour, votre espace client est prêt. Documents joints : bienvenue, certifications, fiche produit.',
+   'b0000000-0000-4000-8000-000000000001');
+
 -- ── M10 — Finance légère (Brique 8) ──────────────────────────────────────────
 -- Statut de paiement par lot (suivi, pas un moteur comptable).
 insert into public.paiements (lot_id, statut, montant, devise, echeance, paye_le, notes) values
