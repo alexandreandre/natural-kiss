@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { getLotByContainer, listLots } from "@/lib/data/lots";
+import {
+  getLotById,
+  getLotByContainer,
+  getLotDetailSections,
+  listLots,
+  listLotsFiltered,
+} from "@/lib/data/lots";
 
 /**
  * Tests d'intégration contre Supabase LOCAL (`supabase start` + `supabase db reset`).
@@ -33,5 +39,30 @@ describe("lots (Supabase local, données de seed)", () => {
     const incoherent = lots.find((l) => l.numeroConteneur === "OTPU6220580");
     expect(incoherent).toBeDefined();
     expect(incoherent?.destinationPays).toBe("NL");
+  });
+
+  it("filtre les lots par statut (Brique 2)", async () => {
+    const rejetes = await listLotsFiltered({ statut: "rejete" });
+    expect(rejetes.length).toBeGreaterThanOrEqual(1);
+    expect(rejetes.every((l) => l.statut === "rejete")).toBe(true);
+  });
+
+  it("trie par risque décroissant (les lots à surveiller d'abord)", async () => {
+    const lots = await listLotsFiltered();
+    const scores = lots.map((l) => l.scoreRisque ?? 0);
+    const sorted = [...scores].sort((a, b) => b - a);
+    expect(scores).toEqual(sorted);
+  });
+
+  it("charge une fiche lot 360° par id, avec ses sections", async () => {
+    const [first] = await listLotsFiltered({ statut: "rejete" });
+    expect(first).toBeDefined();
+
+    const lot = await getLotById(first!.id);
+    expect(lot?.reference).toBe(first!.reference);
+
+    const sections = await getLotDetailSections(first!.id);
+    // Le lot Bimi rejeté porte un rapport qualité (retour client) dans le seed.
+    expect(sections.qualite.length).toBeGreaterThanOrEqual(1);
   });
 });

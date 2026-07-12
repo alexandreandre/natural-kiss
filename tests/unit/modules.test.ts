@@ -16,9 +16,28 @@ describe("registre des modules", () => {
     expect([...covered].sort()).toEqual([...STRATE_ORDER].sort());
   });
 
-  it("n'active que le référentiel (M0) en Brique 0", () => {
+  it("active les modules des briques livrées (jusqu'à la Brique 8 : Cropwise M0b, finance M10, copilot T4, alertes T5)", () => {
     const enabled = MODULES.filter(isModuleEnabled).map((m) => m.id);
-    expect(enabled).toEqual(["M0"]);
+    expect(enabled).toEqual([
+      "M0",
+      "M0b",
+      "M0c",
+      "M1",
+      "M2",
+      "M3",
+      "M4",
+      "M5",
+      "M6",
+      "M7",
+      "M8",
+      "M9",
+      "M10",
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+    ]);
   });
 
   it("chaque module pointe vers une brique et un flag", () => {

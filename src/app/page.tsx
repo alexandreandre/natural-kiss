@@ -1,62 +1,42 @@
-import { AlertCircle, PackageOpen } from "lucide-react";
+import { ArrowRight, Ship } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
-import { LotsPreview } from "@/components/home/lots-preview";
 import { ModulesSection } from "@/components/home/modules-section";
-import { listLots, type LotListItem } from "@/lib/data/lots";
-
-// Données de démo évolutives → rendu dynamique (pas de cache statique).
-export const dynamic = "force-dynamic";
+import { buttonVariants } from "@/components/ui/button";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import { cn } from "@/lib/utils";
 
 export default async function HomePage() {
   const t = await getTranslations();
-
-  let lots: LotListItem[] = [];
-  let dbError = false;
-  try {
-    lots = await listLots(8);
-  } catch {
-    dbError = true;
-  }
+  const trackingOn = isFeatureEnabled("TRACKING");
 
   return (
     <div>
-      {/* Hero */}
-      <section className="from-primary/10 via-background to-background relative overflow-hidden rounded-2xl border bg-gradient-to-br p-8 sm:p-12">
-        <p className="text-primary text-xs font-semibold tracking-wider uppercase">
+      {/* Accueil épuré : une accroche claire + une action évidente. */}
+      <section className="py-4">
+        <p className="text-muted-foreground flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] uppercase">
+          <span className="bg-harvest inline-block size-2 rounded-[1px]" />
           {t("home.heroKicker")}
         </p>
-        <h1 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h1 className="font-display mt-5 max-w-[18ch] text-4xl leading-[1.05] font-medium tracking-tight text-balance sm:text-5xl">
           {t("home.heroTitle")}
         </h1>
-        <p className="text-muted-foreground mt-4 max-w-xl text-sm sm:text-base">
+        <p className="text-muted-foreground mt-4 max-w-[46ch] text-base">
           {t("home.heroSubtitle")}
         </p>
-      </section>
 
-      {/* Lots récents (données Supabase) */}
-      <section className="mt-14">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold tracking-tight">
-            {t("home.recentLotsTitle")}
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {t("home.recentLotsSubtitle")}
-          </p>
-        </div>
-
-        {dbError ? (
-          <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-3 rounded-xl border p-4 text-sm">
-            <AlertCircle className="size-5 shrink-0" />
-            {t("home.dbError")}
+        {trackingOn && (
+          <div className="mt-7">
+            <Link
+              href="/tracking"
+              className={cn(buttonVariants({ size: "lg" }), "h-11 gap-2 px-5 text-sm")}
+            >
+              <Ship className="size-4" />
+              {t("home.ctaTrack")}
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
-        ) : lots.length === 0 ? (
-          <div className="text-muted-foreground flex items-center gap-3 rounded-xl border border-dashed p-6 text-sm">
-            <PackageOpen className="size-5 shrink-0" />
-            {t("home.noLots")}
-          </div>
-        ) : (
-          <LotsPreview lots={lots} />
         )}
       </section>
 

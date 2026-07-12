@@ -1,14 +1,20 @@
 import type {
+  BookingConfirmationProvider,
+  DocVerifierProvider,
   EmailProvider,
   FieldTraceProvider,
   LlmProvider,
+  QcAnalyzerProvider,
   SensorProvider,
   TrackingProvider,
 } from "@/lib/adapters/types";
 import {
+  MockBookingConfirmationProvider,
+  MockDocVerifierProvider,
   MockEmailProvider,
   MockFieldTraceProvider,
   MockLlmProvider,
+  MockQcAnalyzerProvider,
   MockSensorProvider,
   MockTrackingProvider,
 } from "@/lib/adapters/mock";
@@ -62,4 +68,40 @@ export function getLlmProvider(): LlmProvider {
   return pick("NK_LLM_PROVIDER") === "real"
     ? notImplemented("NK_LLM_PROVIDER")
     : new MockLlmProvider();
+}
+
+/**
+ * Vérificateur documentaire (Brique 3). Adossé au LLM : bascule mock → réel via
+ * `NK_LLM_PROVIDER=real`. Le mock est déterministe (cohérence croisée pure) ;
+ * le réel produira le même schéma d'anomalies validé par Zod.
+ */
+export function getDocVerifierProvider(): DocVerifierProvider {
+  return pick("NK_LLM_PROVIDER") === "real"
+    ? notImplemented("NK_LLM_PROVIDER")
+    : new MockDocVerifierProvider();
+}
+
+/**
+ * Analyseur IA des PDF de retour qualité (Brique 6). Adossé au LLM : bascule
+ * mock → réel via `NK_LLM_PROVIDER=real`. Le mock est déterministe (fixtures
+ * calquées sur les vrais rapports QC) ; le réel produira le même schéma
+ * (`qcAnalysisSchema`) validé par Zod.
+ */
+export function getQcAnalyzerProvider(): QcAnalyzerProvider {
+  return pick("NK_LLM_PROVIDER") === "real"
+    ? notImplemented("NK_LLM_PROVIDER")
+    : new MockQcAnalyzerProvider();
+}
+
+/**
+ * Lecture IA d'un mail de confirmation de booking (M4, Brique 9). Adossé au
+ * LLM : bascule mock → réel via `NK_LLM_PROVIDER=real`. Le mock est
+ * déterministe (regex + repères transporteurs) ; le réel produira le même
+ * schéma (`bookingConfirmationExtractSchema`) validé par Zod — simple
+ * pré-remplissage du formulaire de confirmation, jamais une contrainte.
+ */
+export function getBookingConfirmationProvider(): BookingConfirmationProvider {
+  return pick("NK_LLM_PROVIDER") === "real"
+    ? notImplemented("NK_LLM_PROVIDER")
+    : new MockBookingConfirmationProvider();
 }

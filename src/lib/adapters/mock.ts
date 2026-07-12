@@ -1,22 +1,40 @@
 import {
+  type BookingConfirmationExtract,
+  type BookingConfirmationProvider,
+  type DocAnomaly,
+  type DocVerification,
+  type DocVerifierInput,
+  type DocVerifierProvider,
   type EmailMessage,
   type EmailProvider,
   type FieldTrace,
   type FieldTraceProvider,
   type LlmCompletion,
   type LlmProvider,
+  type QcAnalysis,
+  type QcAnalyzerInput,
+  type QcAnalyzerProvider,
+  type QcDefaut,
+  type QcVerdict,
   type SendEmailResult,
   type SensorProvider,
   type SensorReading,
   type TrackingEvent,
   type TrackingProvider,
+  type TransportMode,
+  type VerifierDoc,
   type VesselPosition,
+  bookingConfirmationExtractSchema,
+  docAnomalySchema,
+  docVerificationSchema,
   emailMessageSchema,
   fieldTraceSchema,
   llmCompletionSchema,
+  qcAnalysisSchema,
   sendEmailResultSchema,
   sensorReadingSchema,
   trackingEventSchema,
+  verifierDocSchema,
   vesselPositionSchema,
 } from "@/lib/adapters/types";
 
@@ -310,18 +328,69 @@ export class MockSensorProvider implements SensorProvider {
   }
 }
 
+/** Traces champ connues (Cropwise) — calquées sur le seed, pour un re-sync stable. */
+const KNOWN_FIELD_TRACES: Record<string, Omit<FieldTrace, "ref">> = {
+  CAAU4027760: {
+    site: "Al Batoul — New Cairo",
+    parcelle: "P-07",
+    variete: "Beauregard",
+    dateRecolte: "2026-03-08",
+    traitements: ["Irrigation goutte-à-goutte"],
+  },
+  OLMP2605160: {
+    site: "Al Batoul — New Cairo",
+    parcelle: "P-02",
+    variete: "Inspiration",
+    dateRecolte: "2026-05-04",
+    traitements: ["Culture âgée à la récolte"],
+  },
+  TCLU4239771: {
+    site: "Al Batoul — New Cairo",
+    parcelle: "P-03",
+    variete: "Inspiration",
+    dateRecolte: "2026-03-28",
+    traitements: [],
+  },
+  OTPU6220580: {
+    site: "Al Batoul — New Cairo",
+    parcelle: "P-11",
+    variete: "Bellevue",
+    dateRecolte: "2026-05-10",
+    traitements: ["Plants certifiés indemnes Thrips palmi"],
+  },
+  MEDU7781204: {
+    site: "El Saada — Ismailia",
+    parcelle: "ES-04",
+    variete: "—",
+    dateRecolte: "2026-06-25",
+    traitements: [],
+  },
+};
+
+/** Second site (multi-sites, Brique 8) utilisé pour les refs inconnues (fallback). */
+const SITES = ["Al Batoul — New Cairo", "El Saada — Ismailia"] as const;
+
 export class MockFieldTraceProvider implements FieldTraceProvider {
   readonly name = "mock-fieldtrace";
 
   async getTrace(ref: string): Promise<FieldTrace | null> {
     if (!ref.trim()) return null;
+    const upper = ref.trim().toUpperCase();
+    const known = KNOWN_FIELD_TRACES[upper];
+    if (known) {
+      return fieldTraceSchema.parse({ ref: upper, ...known });
+    }
+
+    // Fallback déterministe (ref inconnue) : site tiré du hash de la ref.
+    const rnd = seededRandom(hashRef(upper));
+    const site = SITES[Math.floor(rnd() * SITES.length)]!;
     return fieldTraceSchema.parse({
-      ref: ref.toUpperCase(),
-      site: "Al Batoul — New Cairo",
-      parcelle: "P-07",
-      variete: "Beauregard",
-      dateRecolte: "2026-03-10",
-      traitements: ["Aucun résidu > LMR", "Irrigation goutte-à-goutte"],
+      ref: upper,
+      site,
+      parcelle: `P-${(hashRef(upper) % 20) + 1}`,
+      variete: "—",
+      dateRecolte: "2026-05-01",
+      traitements: [],
     });
   }
 }
@@ -335,7 +404,7 @@ export class MockEmailProvider implements EmailProvider {
         id: "eml-qc-986640",
         from: "quality@barfoots.com",
         to: ["valentin@natural-kiss.com"],
-        subject: "QC report Tenderstem — RM 6kg (QA Flag RED)",
+        subject: "QC report Tenderstem — RM 6kg (QA Flag RED) — ref OLMP2605160",
         receivedAt: "2026-03-19T11:20:00+00:00",
         snippet: "Please find attached the QC check. Flowering / hollow stems noted.",
         attachments: [
@@ -360,6 +429,39 @@ export class MockEmailProvider implements EmailProvider {
             sizeBytes: 4867985,
           },
         ],
+      },
+      // Fil Voltz (slips patate douce, ref OTPU6220580 / LOT-2026-0004) — 3 messages,
+      // pour démontrer le résumé de fil du copilot (T4) : instruction sheet, quarantaine,
+      // puis litige financier (documents retenus).
+      {
+        id: "eml-voltz-01-instruction",
+        from: "typhanie@graines-voltz.com",
+        to: ["valentin@natural-kiss.com"],
+        subject: "VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
+        receivedAt: "2026-05-13T09:10:00+02:00",
+        snippet:
+          "Merci de confirmer les quantités et l'instruction sheet pour le vol de vendredi (slips Bellevue, réf. OTPU6220580).",
+        attachments: [],
+      },
+      {
+        id: "eml-voltz-02-quarantaine",
+        from: "virginie.jouin@graines-voltz.com",
+        to: ["valentin@natural-kiss.com", "ayman@natural-kiss.com"],
+        subject: "RE: VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
+        receivedAt: "2026-05-29T14:35:00+02:00",
+        snippet:
+          "Détention douanière Amsterdam : thrips / Bemisia détectés, Déclaration Additionnelle absente du phyto OTPU6220580.",
+        attachments: [],
+      },
+      {
+        id: "eml-voltz-03-litige",
+        from: "virginie.jouin@graines-voltz.com",
+        to: ["ayman@natural-kiss.com"],
+        subject: "RE: VOL AVION DU VENDREDI 15 MAI — QUANTITES / INSTRUCTION SHEET — Voltz (OTPU6220580)",
+        receivedAt: "2026-06-01T16:50:00+02:00",
+        snippet:
+          "Suite à la quarantaine, Voltz conteste la facture et retient les documents de paiement du lot OTPU6220580.",
+        attachments: [],
       },
     ];
     return raw.map((m) => emailMessageSchema.parse(m));
@@ -388,6 +490,358 @@ export class MockLlmProvider implements LlmProvider {
       text,
       model: "mock-llm-deterministic",
       tokens: Math.ceil(prompt.length / 4),
+    });
+  }
+}
+
+// ── Vérificateur documentaire (cohérence croisée, pur & déterministe) ─────────
+
+interface StringRule {
+  code: string;
+  severite: DocAnomaly["severite"];
+  label: string;
+}
+interface NumberRule extends StringRule {
+  /** Écart relatif toléré (0.01 = 1 %) avant de compter une incohérence. */
+  tolerance: number;
+}
+
+type MetaKey = keyof VerifierDoc["metadata"];
+
+function collectValues<T>(
+  docs: VerifierDoc[],
+  field: MetaKey,
+): { value: T; source: string }[] {
+  const out: { value: T; source: string }[] = [];
+  for (const d of docs) {
+    const value = d.metadata[field];
+    if (value === null || value === undefined || value === "") continue;
+    out.push({ value: value as T, source: d.type });
+  }
+  return out;
+}
+
+function checkStringField(
+  docs: VerifierDoc[],
+  field: MetaKey,
+  rule: StringRule,
+): DocAnomaly[] {
+  const found = collectValues<string>(docs, field);
+  const distinct = [...new Set(found.map((f) => String(f.value)))];
+  if (distinct.length <= 1) return [];
+  return [
+    docAnomalySchema.parse({
+      code: rule.code,
+      champ: field,
+      severite: rule.severite,
+      message: `${rule.label} : ${found.map((f) => `${f.source} = ${f.value}`).join(" vs ")}.`,
+      valeurs: {
+        trouve: distinct.join(" / "),
+        sources: [...new Set(found.map((f) => f.source))],
+      },
+    }),
+  ];
+}
+
+function checkNumberField(
+  docs: VerifierDoc[],
+  field: MetaKey,
+  rule: NumberRule,
+): DocAnomaly[] {
+  const found = collectValues<number>(docs, field);
+  if (found.length < 2) return [];
+  const values = found.map((f) => f.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (max === 0 || (max - min) / Math.abs(max) <= rule.tolerance) return [];
+  return [
+    docAnomalySchema.parse({
+      code: rule.code,
+      champ: field,
+      severite: rule.severite,
+      message: `${rule.label} : ${found.map((f) => `${f.source} = ${f.value}`).join(" vs ")}.`,
+      valeurs: {
+        trouve: `${min} … ${max}`,
+        sources: [...new Set(found.map((f) => f.source))],
+      },
+    }),
+  ];
+}
+
+/**
+ * Vérification de **cohérence croisée** entre documents d'un même lot — logique
+ * pure et déterministe (testable). Compare les champs partagés (n° conteneur,
+ * code HS, poids, quantité) et renvoie une anomalie par divergence.
+ *
+ * C'est le cœur "IA" du vérificateur en mode mock : le vrai LLM produira le même
+ * schéma d'anomalies (validé par Zod), sans changer la logique de la Gate.
+ */
+export function crossCheckDocuments(documents: VerifierDoc[]): DocAnomaly[] {
+  const docs = documents.map((d) => verifierDocSchema.parse(d));
+  return [
+    ...checkStringField(docs, "numeroConteneur", {
+      code: "conteneur_incoherent",
+      severite: "critique",
+      label: "N° de conteneur incohérent entre documents",
+    }),
+    ...checkStringField(docs, "codeHs", {
+      code: "hs_incoherent",
+      severite: "majeure",
+      label: "Code HS incohérent entre documents",
+    }),
+    ...checkNumberField(docs, "poidsBrutKg", {
+      code: "poids_incoherent",
+      severite: "majeure",
+      label: "Poids brut incohérent entre documents",
+      tolerance: 0.01,
+    }),
+    ...checkNumberField(docs, "quantite", {
+      code: "quantite_incoherente",
+      severite: "majeure",
+      label: "Quantité incohérente entre documents",
+      tolerance: 0.01,
+    }),
+  ];
+}
+
+export class MockDocVerifierProvider implements DocVerifierProvider {
+  readonly name = "mock-doc-verifier";
+
+  async verify(input: DocVerifierInput): Promise<DocVerification> {
+    const anomalies = crossCheckDocuments(input.documents);
+    return docVerificationSchema.parse({
+      anomalies,
+      model: "mock-doc-verifier-deterministic",
+    });
+  }
+}
+
+// ── Analyse IA des PDF de retour qualité (M9, Brique 6) ───────────────────────
+
+/**
+ * Résultat d'analyse pré-calculé pour un PDF de retour qualité connu. Reproduit
+ * les vrais rapports QC du workspace (base de connaissance §6) : c'est le mock
+ * **déterministe** de l'extraction IA. Le vrai LLM produira le même schéma
+ * (`qcAnalysisSchema`), sans changer la logique consommatrice (service/tendances).
+ */
+interface QcFixture {
+  /** Sous-chaînes (majuscules) reconnaissant le fichier. */
+  match: string[];
+  score: number;
+  verdict: QcVerdict;
+  resume: string;
+  defauts: QcDefaut[];
+}
+
+const QC_FIXTURES: QcFixture[] = [
+  {
+    match: ["986640"],
+    score: 84,
+    verdict: "rouge",
+    resume:
+      "Tenderstem RM 6 kg âgé (~12 j) : floraison marquée et tiges creuses. QA Flag ROUGE.",
+    defauts: [
+      {
+        code: "floraison",
+        libelle: "Floraison",
+        categorie: "aspect",
+        severite: "majeur",
+      },
+      {
+        code: "florets-ouverts",
+        libelle: "Florets ouverts",
+        categorie: "aspect",
+        severite: "majeur",
+      },
+      {
+        code: "tiges-creuses",
+        libelle: "Tiges creuses",
+        categorie: "aspect",
+        severite: "majeur",
+      },
+      {
+        code: "parage",
+        libelle: "Mauvais parage",
+        categorie: "parage",
+        severite: "mineur",
+      },
+      {
+        code: "sur-diametre",
+        libelle: "Sur-diamètre / sur-longueur",
+        categorie: "calibre",
+        severite: "mineur",
+      },
+    ],
+  },
+  {
+    match: ["995769"],
+    score: 91,
+    verdict: "vert",
+    resume:
+      "Tenderstem RM 6 kg majoritairement conforme (2 checks rouges sur floraison/parage).",
+    defauts: [
+      {
+        code: "floraison",
+        libelle: "Floraison",
+        categorie: "aspect",
+        severite: "mineur",
+      },
+      { code: "parage", libelle: "Parage", categorie: "parage", severite: "mineur" },
+      {
+        code: "sur-longueur",
+        libelle: "Sur-longueur",
+        categorie: "calibre",
+        severite: "mineur",
+      },
+      {
+        code: "tiges-creuses",
+        libelle: "Tiges creuses",
+        categorie: "aspect",
+        severite: "mineur",
+      },
+    ],
+  },
+  {
+    match: ["CAAU4027760", "BR41239", "SWEET_POTATO", "SHAHD"],
+    score: 70,
+    verdict: "orange",
+    resume:
+      "Patate douce SHAHD EL MALIKA — note « Fair » : radicelles ~30 % (non-conforme L2), re-calibrage.",
+    defauts: [
+      {
+        code: "radicelles",
+        libelle: "Radicelles",
+        categorie: "aspect",
+        severite: "majeur",
+        tauxPct: 30,
+      },
+      {
+        code: "cicatrices",
+        libelle: "Cicatrices",
+        categorie: "aspect",
+        severite: "mineur",
+      },
+      {
+        code: "germination-precoce",
+        libelle: "Germination précoce",
+        categorie: "maturite",
+        severite: "mineur",
+      },
+      {
+        code: "sous-calibres",
+        libelle: "Sous-calibres",
+        categorie: "calibre",
+        severite: "mineur",
+      },
+    ],
+  },
+  {
+    match: ["FRAISE", "FA_FRAISE", "65673601", "65726201"],
+    score: 55,
+    verdict: "rouge",
+    resume:
+      "Fraise ELSAADA — code tri élevé (4) : Botrytis et fruits immatures au-dessus des seuils.",
+    defauts: [
+      {
+        code: "botrytis",
+        libelle: "Botrytis",
+        categorie: "sanitaire",
+        severite: "critique",
+        tauxPct: 4.5,
+      },
+      {
+        code: "fruits-immatures",
+        libelle: "Fruits immatures",
+        categorie: "maturite",
+        severite: "majeur",
+        tauxPct: 7.5,
+      },
+      {
+        code: "fruits-mous",
+        libelle: "Fruits mous / marqués",
+        categorie: "aspect",
+        severite: "mineur",
+      },
+      {
+        code: "collets-blancs",
+        libelle: "Collets blancs",
+        categorie: "aspect",
+        severite: "mineur",
+      },
+    ],
+  },
+];
+
+function resolveQcFixture(filename: string): QcFixture | null {
+  const up = filename.toUpperCase();
+  return QC_FIXTURES.find((f) => f.match.some((m) => up.includes(m))) ?? null;
+}
+
+export class MockQcAnalyzerProvider implements QcAnalyzerProvider {
+  readonly name = "mock-qc-analyzer";
+
+  async analyze(input: QcAnalyzerInput): Promise<QcAnalysis> {
+    const fixture = resolveQcFixture(input.filename);
+    const model = "mock-qc-analyzer-deterministic";
+
+    if (fixture) {
+      return qcAnalysisSchema.parse({
+        score: fixture.score,
+        verdict: fixture.verdict,
+        defauts: fixture.defauts,
+        resume: fixture.resume,
+        model,
+      });
+    }
+
+    // PDF inconnu : analyse « propre » par défaut, déterministe (sans défaut).
+    return qcAnalysisSchema.parse({
+      score: 88,
+      verdict: "vert",
+      defauts: [],
+      resume: input.produit
+        ? `Retour ${input.produit} conforme — aucun défaut significatif détecté.`
+        : "Retour conforme — aucun défaut significatif détecté.",
+      model,
+    });
+  }
+}
+
+// ── Lecture IA d'un mail de confirmation de booking (M4, Brique 9) ────────────
+
+const CONTAINER_RE = /\b([A-Z]{4}\d{6,7})\b/;
+const DATE_RE = /\b(\d{4}-\d{2}-\d{2})\b/;
+/** Repères transporteurs connus (base de connaissance) → mode déduit. */
+const CARRIER_HINTS: { match: RegExp; nom: string; mode: TransportMode }[] = [
+  { match: /dfds|olympos/i, nom: "DFDS (RoRo Olympos Seaways)", mode: "roro" },
+  { match: /msc|borchard/i, nom: "MSC / Borchard", mode: "sea" },
+  { match: /total cargo|\btcl\b/i, nom: "Total Cargo Shipping (TCL)", mode: "sea" },
+  { match: /kuehne|k\s*\+\s*n/i, nom: "Kuehne + Nagel", mode: "air" },
+  { match: /wallenborn/i, nom: "Wallenborn", mode: "road" },
+  { match: /air france/i, nom: "Air France Cargo", mode: "air" },
+];
+
+/**
+ * Extraction déterministe (regex + repères transporteurs connus) du mail de
+ * confirmation de booking — peu importe l'expéditeur (transporteur direct,
+ * broker, transitaire). Le vrai LLM produira le même schéma
+ * (`bookingConfirmationExtractSchema`), sans changer le formulaire de
+ * confirmation qui consomme ce résultat comme simple pré-remplissage.
+ */
+export class MockBookingConfirmationProvider implements BookingConfirmationProvider {
+  readonly name = "mock-booking-confirmation";
+
+  async parseConfirmation(emailText: string): Promise<BookingConfirmationExtract> {
+    const numeroConteneur = emailText.match(CONTAINER_RE)?.[1] ?? null;
+    const dateDepart = emailText.match(DATE_RE)?.[1] ?? null;
+    const carrier = CARRIER_HINTS.find((c) => c.match.test(emailText));
+
+    return bookingConfirmationExtractSchema.parse({
+      numeroConteneur,
+      transporteurNom: carrier?.nom ?? null,
+      dateDepart,
+      mode: carrier?.mode ?? null,
+      model: "mock-booking-confirmation-deterministic",
     });
   }
 }

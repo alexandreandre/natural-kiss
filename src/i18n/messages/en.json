@@ -7,24 +7,39 @@
   "nav": {
     "home": "Home",
     "lots": "Shipments",
+    "booking": "Booking",
+    "gate": "Documents & Gate",
+    "chargement": "Loading",
+    "portail": "Customer portal",
     "tracking": "Container tracking",
+    "dashboard": "Dashboard",
+    "planning": "Planning",
+    "qualite": "Reception & quality",
     "language": "Language",
     "theme": "Theme",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "themeSystem": "System"
+    "themeSystem": "System",
+    "collapse": "Collapse menu",
+    "expand": "Expand menu",
+    "open": "Open menu",
+    "close": "Close menu",
+    "demande": "Requests & onboarding",
+    "finance": "Finance",
+    "copilot": "AI copilot",
+    "alertes": "Alerts",
+    "section": {
+      "flow": "Shipment journey",
+      "tools": "Cross-cutting tools"
+    }
   },
   "home": {
     "heroKicker": "Platform",
-    "heroTitle": "The whole export flow, around one central object: the shipment",
-    "heroSubtitle": "From first customer contact to quality feedback and closing — every container tracked end to end.",
+    "heroTitle": "Track your containers, simply.",
+    "heroSubtitle": "Pick a module below to get started.",
+    "ctaTrack": "Track a container",
     "modulesTitle": "Platform modules",
-    "modulesSubtitle": "Shipped brick by brick. Upcoming modules are visible but disabled.",
-    "recentLotsTitle": "Recent shipments",
-    "recentLotsSubtitle": "Live data read from Supabase.",
-    "viewAll": "View all shipments",
-    "noLots": "No shipments yet. Run “npm run db:reset” to seed the demo data.",
-    "dbError": "Database unreachable. Check .env.local and that Supabase is running."
+    "modulesSubtitle": "Shipped brick by brick. Upcoming modules are visible but disabled."
   },
   "strate": {
     "socle": "Permanent core",
@@ -33,7 +48,10 @@
     "transverse": "Cross-cutting layers"
   },
   "module": {
-    "status": { "active": "Active", "soon": "Coming soon" },
+    "status": {
+      "active": "Active",
+      "soon": "Coming soon"
+    },
     "brique": "Brick {n}",
     "referentiel": {
       "title": "Master data",
@@ -108,6 +126,75 @@
       "desc": "Delay, temperature excursion, missing document."
     }
   },
+  "tracking": {
+    "kicker": "M7 · Transport & tracking",
+    "title": "Track a container's whole journey",
+    "subtitle": "Enter a container, booking or shipment number to see its timeline, position, temperature curve and arrival risk score.",
+    "searchLabel": "Container, booking or shipment number",
+    "searchPlaceholder": "e.g. CAAU4027760, OLMP2605160, LOT-2026-0001…",
+    "searchButton": "Track",
+    "examplesLabel": "Examples",
+    "emptyTitle": "No container tracked yet",
+    "emptyBody": "Enter a number above, or pick an example, to display the shipment's whole journey.",
+    "notFoundTitle": "No shipment found for “{query}”",
+    "notFoundBody": "Check the number you entered (container, booking or shipment reference) and try again.",
+    "dbError": "Database unreachable. Check .env.local and that Supabase is running.",
+    "modes": {
+      "sea": "Sea",
+      "roro": "RoRo",
+      "air": "Air",
+      "road": "Road"
+    },
+    "header": {
+      "client": "Customer",
+      "mode": "Mode",
+      "container": "Reference",
+      "consigne": "Set point",
+      "harvest": "Harvest",
+      "carrier": "Carrier"
+    },
+    "map": {
+      "title": "Position & route",
+      "unavailable": "Map unavailable — WebGL is disabled in this browser.",
+      "currentPosition": "Current position: {lat}, {lng}",
+      "openInOsm": "View on OpenStreetMap"
+    },
+    "timeline": {
+      "title": "Journey timeline"
+    },
+    "eventCodes": {
+      "booking": "Booking",
+      "loading": "Loading",
+      "departure": "Departure",
+      "transit": "In transit",
+      "port_call": "Port call",
+      "arrival": "Arrival",
+      "customs": "Customs",
+      "delivery": "Delivery"
+    },
+    "sensor": {
+      "title": "Temperature & humidity (datalogger)",
+      "temp": "Temperature",
+      "humidity": "Humidity",
+      "target": "Set point",
+      "noData": "No sensor readings available for this shipment."
+    },
+    "risk": {
+      "title": "Arrival risk score",
+      "computed": "Computed from age at shipping, transit duration and temperature excursions.",
+      "dayUnit": "d",
+      "band": {
+        "faible": "Low risk",
+        "moyen": "Moderate risk",
+        "eleve": "High risk"
+      },
+      "factors": {
+        "harvestAge": "Age at shipping",
+        "transit": "Transit duration",
+        "excursion": "Temperature excursion"
+      }
+    }
+  },
   "lotStatus": {
     "booking": "Booking",
     "chargement": "Loading",
@@ -123,10 +210,541 @@
     "client": "Customer",
     "product": "Product",
     "destination": "Destination",
+    "mode": "Mode",
+    "departure": "Departure → Arrival",
     "status": "Status",
     "risk": "Risk"
   },
+  "lots": {
+    "kicker": "M4 · Shipment object",
+    "title": "Your shipments, end to end",
+    "subtitle": "The filterable list of every shipment. Click a shipment to open its 360° view: journey, documents, quality and origin.",
+    "count": "{count, plural, =0 {No shipment} one {# shipment} other {# shipments}}",
+    "empty": "No shipment matches these filters.",
+    "reset": "Reset filters",
+    "filters": {
+      "client": "Customer",
+      "product": "Product",
+      "country": "Country",
+      "status": "Status",
+      "all": "All"
+    },
+    "departurePlanned": "planned",
+    "departureActual": "actual",
+    "backToList": "All shipments",
+    "notFound": "Shipment not found.",
+    "notFoundBody": "This shipment does not exist or has been removed.",
+    "noContainer": "No container no.",
+    "noTracking": "The journey will be available once a container number is attached to this shipment (booking confirmed).",
+    "tabs": {
+      "voyage": "Journey",
+      "gate": "Compliance & Gate",
+      "chargement": "Loading & proof",
+      "documents": "Documents",
+      "quality": "Quality",
+      "origin": "Origin",
+      "finance": "Finance",
+      "alertes": "Alerts"
+    },
+    "documents": {
+      "title": "Shipment documents",
+      "empty": "No document uploaded for this shipment.",
+      "hint": "Upload and verify documents in the “Compliance & Gate” tab.",
+      "type": {
+        "facture": "Invoice",
+        "bl": "Bill of lading (BL)",
+        "phyto": "Phytosanitary certificate",
+        "packing_list": "Packing list",
+        "certificat_origine": "Certificate of origin",
+        "ched_pp": "CHED-PP",
+        "autre": "Other document"
+      },
+      "status": {
+        "recu": "Received",
+        "verifie": "Verified",
+        "anomalie": "Anomaly"
+      }
+    },
+    "quality": {
+      "title": "Quality reports",
+      "empty": "No quality report for this shipment.",
+      "hint": "Quality feedback imported by email is analysed by AI (defects, score, verdict) and matched to the shipment.",
+      "score": "Score",
+      "defects": "Reported defects",
+      "source": {
+        "qc_depart": "Departure QC",
+        "retour_client": "Customer feedback"
+      },
+      "verdict": {
+        "vert": "Compliant",
+        "orange": "With reservations",
+        "rouge": "Non-compliant"
+      }
+    },
+    "origin": {
+      "title": "Origin & field traceability",
+      "empty": "No origin data for this shipment.",
+      "hint": "The Cropwise connector links this shipment to its plot/harvest — click “Sync from Cropwise”.",
+      "site": "Site",
+      "plot": "Plot",
+      "variety": "Variety",
+      "harvest": "Harvest",
+      "treatments": "Treatments",
+      "sync": "Sync from Cropwise",
+      "syncing": "Syncing…"
+    }
+  },
+  "booking": {
+    "kicker": "M4 · Booking",
+    "title": "Booking dossier & confirmation",
+    "subtitle": "The booking channel varies (direct carrier, broker, forwarder, phone…) — the tool doesn't force one. It standardises the dossier to send out, then creates the shipment as soon as a single confirmation step happens: container number, carrier, departure date.",
+    "form": {
+      "title": "New request",
+      "hint": "Generates the booking dossier (standardised text, copyable to any channel).",
+      "client": "Client",
+      "clientPlaceholder": "Choose a client",
+      "produit": "Product",
+      "variete": "Variety",
+      "quantite": "Quantity",
+      "unite": "Unit",
+      "incoterm": "Incoterm",
+      "mode": "Transport mode",
+      "modeSea": "Sea",
+      "modeRoro": "RoRo",
+      "modeAir": "Air",
+      "modeRoad": "Road",
+      "destinationPays": "Destination country",
+      "destinationPort": "Destination port",
+      "dateSouhaitee": "Desired departure date",
+      "submit": "Generate the dossier",
+      "dossierCree": "Dossier generated — see the register below."
+    },
+    "list": {
+      "title": "Dossier register",
+      "hint": "Copy the dossier to your usual channel, then confirm as soon as the carrier replies.",
+      "empty": "No booking dossier yet.",
+      "copierDossier": "Copy dossier",
+      "copie": "Copied!",
+      "marquerEnvoye": "Mark as sent",
+      "confirmer": "Confirm this dossier",
+      "masquerConfirmation": "Hide",
+      "statut": {
+        "brouillon": "Draft",
+        "envoye": "Sent",
+        "confirme": "Confirmed"
+      }
+    },
+    "confirm": {
+      "pasteEmail": "Paste a confirmation email (optional)",
+      "pasteEmailPlaceholder": "Paste the confirmation email text here (carrier, broker, forwarder…)",
+      "analyser": "Analyse (AI)",
+      "parseDone": "Fields pre-filled — check before confirming.",
+      "parseError": "Could not read the email.",
+      "numeroConteneur": "Container no.",
+      "transporteurNom": "Carrier",
+      "dateDepart": "Departure date",
+      "submit": "Confirm booking",
+      "lotCree": "Shipment {reference} created"
+    },
+    "quick": {
+      "title": "Direct booking",
+      "hint": "Without a prior dossier — when the booking was handled entirely outside the tool.",
+      "client": "Client",
+      "clientPlaceholder": "Choose a client",
+      "produit": "Product",
+      "mode": "Transport mode",
+      "modeSea": "Sea",
+      "modeRoro": "RoRo",
+      "modeAir": "Air",
+      "modeRoad": "Road"
+    }
+  },
+  "gate": {
+    "gateTitle": "“Check OK” gate",
+    "run": "Run AI verification",
+    "running": "Verifying…",
+    "mailSent": "“Check OK” email sent to customer / broker",
+    "status": {
+      "vert": "Check OK — shipping cleared",
+      "rouge": "Blocked — anomalies to fix",
+      "en_attente": "Awaiting verification"
+    },
+    "help": {
+      "vert": "Documents complete and compliance validated: the gate is open and the email has been sent to the customer / broker.",
+      "rouge": "{anomalies} blocking anomaly(ies) and {conformite} compliance check(s) failing. Shipping stays blocked until everything is green.",
+      "en_attente": "No verification has run on this file yet. Click “Run AI verification” to cross-check documents and compliance."
+    },
+    "conformite": {
+      "title": "Compliance checklist (country / product)",
+      "empty": "Run the verification to assess the file's compliance."
+    },
+    "confStatut": {
+      "ok": "Compliant",
+      "manquant": "Missing",
+      "non_conforme": "Non-compliant",
+      "non_applicable": "Not applicable"
+    },
+    "anomalies": {
+      "title": "Document anomalies (AI checker)",
+      "pending": "Run the verification to detect inconsistencies between documents.",
+      "none": "No inconsistency detected between documents."
+    },
+    "severite": {
+      "mineure": "Minor anomaly",
+      "majeure": "Major anomaly",
+      "critique": "Critical anomaly"
+    },
+    "documents": {
+      "title": "File documents"
+    },
+    "upload": {
+      "type": "Document type",
+      "file": "File",
+      "submit": "Upload",
+      "uploading": "Uploading…"
+    },
+    "journal": {
+      "title": "Gate log",
+      "check_ok": "Gate green (Check OK)",
+      "mail_envoye": "“Check OK” email sent",
+      "override": "Manual gate override"
+    },
+    "overview": {
+      "kicker": "M6 · Documents & Compliance",
+      "title": "The “Check OK” gate of your files",
+      "subtitle": "Overview of compliance status per shipment. Nothing leaves until documents and compliance are green. Click a shipment to open its file."
+    }
+  },
+  "qualite": {
+    "kicker": "T2 · Email hub & M9 · Customer quality",
+    "title": "The quality loop, automated",
+    "subtitle": "Quality feedback arrives by email: the PDF is imported, matched to the right shipment and analysed by AI (defects, score, verdict). Trends consolidate by product, customer and site.",
+    "analyzedBy": "Analysed by {model}",
+    "severite": {
+      "mineur": "Minor",
+      "majeur": "Major",
+      "critique": "Critical"
+    },
+    "categorie": {
+      "aspect": "Appearance",
+      "maturite": "Maturity",
+      "calibre": "Sizing",
+      "parage": "Trimming",
+      "sanitaire": "Sanitary",
+      "autre": "Other"
+    },
+    "inbox": {
+      "title": "Inbox (mock)",
+      "subtitle": "Incoming emails with a PDF attachment. Import to match the shipment and run the AI analysis.",
+      "empty": "No emails in the inbox.",
+      "noPdf": "No PDF",
+      "import": "Import & analyse",
+      "reimport": "Re-analyse",
+      "matched": "Matched to {ref}",
+      "unmatched": "Shipment unresolved",
+      "status": {
+        "rattache": "Imported",
+        "non_rattache": "Unmatched",
+        "erreur": "Error"
+      }
+    },
+    "trends": {
+      "title": "Quality trends",
+      "subtitle": "Verdict breakdown and recurring defects, aggregated over analysed feedback.",
+      "empty": "No quality analysis yet. Import feedback from the inbox.",
+      "emptyGroup": "No data.",
+      "topDefauts": "Most frequent defects",
+      "byProduit": "By product",
+      "byClient": "By customer",
+      "bySite": "By site"
+    },
+    "comparison": {
+      "depart": "Departure (box photo)",
+      "retour": "Arrival (analysed feedback)",
+      "photoPresent": "Photo present",
+      "noPhoto": "No departure photo",
+      "noRetour": "No feedback yet"
+    }
+  },
+  "chargement": {
+    "kicker": "M5 · Packing & loading",
+    "title": "Proof of departure, at loading",
+    "subtitle": "Scan the QR or photograph a box at loading. The box photo becomes visible to the customer in their portal; every capture is timestamped and logged in the shipment timeline.",
+    "hasPhoto": "Box photo",
+    "preuveCount": "{count, plural, =0 {No proof} one {# proof} other {# proofs}}",
+    "panelTitle": "Loading proofs",
+    "panelHelp": "Upload a photo of a product box (visible to the customer) and/or the loading QR / photo (internal). Each proof timestamps and logs the shipment loading.",
+    "captureTitle": "New proof",
+    "gallery": "Attached proofs",
+    "empty": "No proof attached to this shipment yet.",
+    "visibleClient": "Customer-visible",
+    "internalOnly": "Internal",
+    "preuveType": {
+      "photo_boite": "Product box photo",
+      "qr_chargement": "Loading QR / photo",
+      "autre": "Other proof"
+    },
+    "upload": {
+      "type": "Proof type",
+      "file": "Image",
+      "submit": "Capture",
+      "uploading": "Uploading…"
+    }
+  },
+  "portail": {
+    "space": "Customer space",
+    "logout": "Sign out",
+    "kicker": "Customer portal",
+    "welcome": "Hello, {client}",
+    "subtitle": "Track your shipments, their status, your documents and the product photo at departure.",
+    "myLots": "{count, plural, =0 {No shipment} one {# shipment} other {# shipments}}",
+    "empty": "No shipment is attached to you yet.",
+    "backToLots": "My shipments",
+    "notFound": "This shipment does not exist or is not accessible to you.",
+    "login": {
+      "kicker": "Customer portal",
+      "title": "Sign in to your space",
+      "subtitle": "Enter your work email: you'll receive a secure sign-in link (magic link), no password required.",
+      "emailLabel": "Email",
+      "submit": "Send sign-in link",
+      "sending": "Sending…",
+      "sent": "A sign-in link was sent to {email}. Open it to access your space.",
+      "error": "Invalid or expired link. Please request a new sign-in link."
+    },
+    "detail": {
+      "departure": "Departure",
+      "arrival": "Arrival",
+      "photoTitle": "Product photo at departure",
+      "noPhoto": "No product photo available for this shipment.",
+      "timelineTitle": "Shipment timeline",
+      "documentsTitle": "Documents",
+      "noDocuments": "No document available for this shipment.",
+      "qualityTitle": "Quality checks"
+    }
+  },
+  "dashboard": {
+    "kicker": "T3 · Dashboard & KPIs",
+    "title": "Steer your service, at a glance",
+    "subtitle": "Filter by customer, product, country or risk level. Service rate and delay rate recompute over the matching shipments.",
+    "empty": "No shipment matches these filters.",
+    "reset": "Reset filters",
+    "filters": {
+      "client": "Customer",
+      "product": "Product",
+      "country": "Country",
+      "risk": "Risk",
+      "all": "All"
+    },
+    "kpi": {
+      "service": "Service rate",
+      "serviceCaption": "{count, plural, =0 {no arrived shipment evaluated} one {over # arrived shipment} other {over # arrived shipments}}",
+      "late": "Delay rate",
+      "lateCaption": "{count, plural, =0 {no late shipment} one {# late shipment} other {# late shipments}}",
+      "avgDelay": "Avg. delay",
+      "avgDelayCaption": "over shipments that arrived late",
+      "lots": "Shipments",
+      "lotsCaption": "incl. {transit} in transit"
+    },
+    "charts": {
+      "byStatut": "Shipments by status",
+      "byCountry": "Shipments by country",
+      "byRisk": "Risk breakdown"
+    }
+  },
+  "planning": {
+    "kicker": "M3 · Order & Planning",
+    "title": "Departure planning, planned vs actual",
+    "subtitle": "The week-by-week planning imported from your Excel. Each planned departure is reconciled with the shipment that actually left, to surface slippage.",
+    "empty": "No planning rows yet. Import your Excel file to get started.",
+    "weekAbbr": " wk",
+    "import": {
+      "title": "Import planning (Excel / CSV)",
+      "help": "Expected columns: week, customer, product, variety, destination, planned quantity, unit, lot (actual shipment reference, optional). Lenient headers.",
+      "file": "File",
+      "submit": "Import",
+      "uploading": "Importing…",
+      "sample": "Download a sample file",
+      "success": "{inserted} row(s) imported, {lots} linked to an actual shipment.",
+      "linePrefix": "Row {row}: "
+    },
+    "summary": {
+      "total": "Planned departures",
+      "realise": "Completed",
+      "glissement": "Slippage",
+      "planifie": "Upcoming",
+      "realisation": "Completion rate"
+    },
+    "etat": {
+      "planifie": "Upcoming",
+      "realise": "Completed",
+      "glissement": "Slippage"
+    },
+    "table": {
+      "week": "Week",
+      "client": "Customer",
+      "product": "Product",
+      "destination": "Destination",
+      "planned": "Planned qty",
+      "actual": "Actual shipment",
+      "state": "State"
+    }
+  },
   "footer": {
     "built": "Foundations (Brick 0) — Next.js · Supabase · mock-first adapters."
+  },
+  "certif": {
+    "ggap": "GlobalG.A.P.",
+    "grasp": "GRASP",
+    "brcgs": "BRCGS",
+    "smeta": "SMETA",
+    "sedex": "Sedex"
+  },
+  "demande": {
+    "kicker": "M1 · M2 · M0c — Client rail",
+    "title": "Request, certification matching & onboarding",
+    "subtitle": "A request comes in (product × country × client). The platform automatically checks certification coverage against the vault: if everything is covered, the presentation pack and certificates are sent automatically; otherwise an alert and a correction workflow are created.",
+    "form": {
+      "title": "New request",
+      "hint": "Enter the product and country: certification matching is instant.",
+      "client": "Client / prospect",
+      "produit": "Product",
+      "produitPlaceholder": "e.g. Mango, Broccoli…",
+      "pays": "Destination country",
+      "paysPlaceholder": "e.g. UK, FR…",
+      "email": "Contact email",
+      "volume": "Volume (optional)",
+      "submit": "Receive & qualify",
+      "resultSuffisant": "Certifications sufficient — pack sent automatically.",
+      "resultInsuffisant": "Certifications insufficient — correction workflow triggered.",
+      "mailSent": "Presentation pack + certifications sent (mock) to the client.",
+      "tachesCreees": "{n} correction task(s) created."
+    },
+    "list": {
+      "title": "Received requests",
+      "empty": "No requests yet.",
+      "packEnvoye": "Presentation pack + certifications sent (mock).",
+      "taches": "Correction workflow"
+    },
+    "decision": {
+      "suffisant": "Sufficient",
+      "insuffisant": "Insufficient",
+      "en_attente": "Pending"
+    },
+    "onboard": {
+      "action": "Create client space",
+      "created": "Client space created ({email}).",
+      "done": "Client space created"
+    },
+    "coffre": {
+      "title": "Certification vault",
+      "subtitle": "Natural Kiss certifications, their product/country coverage and validity. Matching relies strictly on this vault.",
+      "aucunProduit": "no product covered",
+      "valableJusqu": "valid until {date}",
+      "alertesTitle": "Certifications nearing expiry",
+      "expiree": "expired since {date}",
+      "expireDans": "expires in {jours} days (on {date})",
+      "statut": {
+        "valide": "Valid",
+        "suspendue": "Suspended",
+        "expiree": "Expired"
+      }
+    }
+  },
+  "finance": {
+    "overview": {
+      "kicker": "M10 · Finance & closing",
+      "title": "Payment status & disputes",
+      "subtitle": "Payment status per shipment, invoice consistency (cross-checked against the AI document verifier) and disputes — a light ledger, not a full accounting engine.",
+      "litigesCount": "{count, plural, one {# open dispute} other {# open disputes}}"
+    },
+    "payment": {
+      "title": "Payment status",
+      "label": "Status",
+      "amount": "Amount",
+      "dueDate": "Due date",
+      "status": {
+        "label": "Status",
+        "a_venir": "Upcoming",
+        "en_attente": "Awaiting payment",
+        "partiel": "Partial",
+        "paye": "Paid",
+        "litige": "Disputed"
+      }
+    },
+    "invoiceCoherence": {
+      "coherente": "Invoice consistent",
+      "incoherente": "Invoice inconsistent",
+      "inconnue": "Not yet checked"
+    },
+    "litiges": {
+      "title": "Disputes",
+      "open": "Open a dispute",
+      "empty": "No dispute on this shipment.",
+      "type": "Type",
+      "amount": "Amount contested",
+      "description": "Description",
+      "submit": "Log dispute",
+      "resolve": "Mark resolved",
+      "resolvedNote": "Resolved from the shipment file.",
+      "types": {
+        "facture_contestee": "Invoice contested",
+        "sous_evaluation_douaniere": "Customs under-valuation",
+        "qualite": "Quality",
+        "autre": "Other"
+      },
+      "statut": {
+        "ouvert": "Open",
+        "en_cours": "In progress",
+        "resolu": "Resolved",
+        "clos": "Closed"
+      }
+    },
+    "destruction": {
+      "title": "Destruction certificate",
+      "issue": "Issue destruction certificate",
+      "defaultMotif": "Shipment rejected / destroyed on arrival."
+    },
+    "saving": "Saving…",
+    "save": "Save"
+  },
+  "alertes": {
+    "overview": {
+      "kicker": "T5 · Alerts",
+      "title": "Proactive alerts",
+      "subtitle": "Vessel delay, temperature excursion, missing document, quarantine risk — computed from tracking, sensor data and the Gate."
+    },
+    "lotTitle": "Alerts",
+    "none": "No active alert.",
+    "scan": "Scan this shipment",
+    "scanAll": "Scan all shipments",
+    "scanning": "Scanning…",
+    "type": {
+      "retard_navire": "Vessel/flight delay",
+      "excursion_temperature": "Temperature excursion",
+      "document_manquant": "Missing document",
+      "risque_quarantaine": "Quarantine risk"
+    },
+    "severite": {
+      "info": "Info",
+      "avertissement": "Warning",
+      "critique": "Critical"
+    }
+  },
+  "copilot": {
+    "overview": {
+      "kicker": "T4 · AI copilot",
+      "title": "Summarize threads, draft documents",
+      "subtitle": "Pick an email thread to get an AI summary, a reply draft, and (when a shipment is matched) an instruction sheet."
+    },
+    "messageCount": "{count, plural, one {# message} other {# messages}}",
+    "summarize": "Summarize thread",
+    "running": "Working…",
+    "summary": "Summary",
+    "actions": "Suggested actions",
+    "draftReply": "Reply draft",
+    "model": "Model",
+    "generateSheet": "Instruction sheet",
+    "generate": "Generate",
+    "empty": "No email thread available."
   }
 }

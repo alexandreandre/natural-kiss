@@ -1,23 +1,25 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Brique 0 — parcours principal : « l'app charge et lit un lot depuis Supabase ».
+ * Accueil épuré : l'app charge, la grille des modules s'affiche, et l'action
+ * principale (suivre un conteneur) mène à la page de suivi.
  */
-test("la home charge et affiche un lot lu depuis Supabase", async ({ page }) => {
+test("la home charge, liste les modules et mène au suivi conteneur", async ({
+  page,
+}) => {
   await page.goto("/");
 
   // L'app est montée (marque visible).
   await expect(page.getByText("Natural Kiss").first()).toBeVisible();
 
-  // Un lot de démo réel est rendu (n° de conteneur issu du seed Supabase).
-  await expect(page.getByText("CAAU4027760")).toBeVisible();
-
-  // Le tableau des lots récents est présent avec plusieurs lignes.
-  const rows = page.locator("table tbody tr");
-  await expect(rows.first()).toBeVisible();
-  expect(await rows.count()).toBeGreaterThanOrEqual(3);
-
   // La grille des modules liste le socle (M0 · Référentiel) marqué actif.
   await expect(page.getByRole("heading", { name: "Référentiel" })).toBeVisible();
   await expect(page.getByText("Actif").first()).toBeVisible();
+
+  // L'action principale mène à la page de suivi (P0).
+  await page.getByRole("link", { name: "Suivre un conteneur" }).click();
+  await expect(page).toHaveURL(/\/tracking/);
+  await expect(
+    page.getByRole("heading", { name: /Suivez tout le voyage/ }),
+  ).toBeVisible();
 });

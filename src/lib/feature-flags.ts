@@ -14,21 +14,23 @@ export const FEATURE_FLAGS = {
   /** M0 — Référentiel / Master Data (Brique 0). */
   REFERENTIEL: true,
   /** M7 — Suivi de voyage par n° de conteneur (Brique 1). */
-  TRACKING: false,
+  TRACKING: true,
   /** Liste & fiche détaillée d'un lot (Brique 2). */
-  LOTS: false,
+  LOTS: true,
   /** M6 — Documents, conformité, vérificateur IA & Gate (Brique 3). */
-  GATE: false,
+  GATE: true,
   /** M5 + T1 — Chargement, preuve produit & portail client (Brique 4). */
-  PORTAIL: false,
+  PORTAIL: true,
   /** T3 + M3 — Dashboard, KPIs & planning prévu/réalisé (Brique 5). */
-  DASHBOARD: false,
+  DASHBOARD: true,
   /** T2 + M9 — Hub email & analyse IA des retours qualité (Brique 6). */
-  EMAIL_HUB: false,
+  EMAIL_HUB: true,
   /** M1 + M2 + M0c — Demande, onboarding & coffre certifications (Brique 7). */
-  ONBOARDING: false,
+  ONBOARDING: true,
   /** M0b + M10 + T4 + T5 — Cropwise, finance, copilot & alertes (Brique 8). */
-  COMPLETUDE: false,
+  COMPLETUDE: true,
+  /** M4 — Dossier de réservation & confirmation de booking (Brique 9). */
+  BOOKING: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;
@@ -67,4 +69,5 @@ const OVERRIDES: Record<FeatureFlag, string | undefined> = {
   EMAIL_HUB: process.env.NEXT_PUBLIC_FLAG_EMAIL_HUB,
   ONBOARDING: process.env.NEXT_PUBLIC_FLAG_ONBOARDING,
   COMPLETUDE: process.env.NEXT_PUBLIC_FLAG_COMPLETUDE,
+  BOOKING: process.env.NEXT_PUBLIC_FLAG_BOOKING,
 };

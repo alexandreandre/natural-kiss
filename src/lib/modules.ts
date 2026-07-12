@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   Inbox,
   ClipboardList,
+  Boxes,
   PackageCheck,
   FileCheck2,
   Ship,
@@ -37,6 +38,8 @@ export interface ModuleDef {
   flag: FeatureFlag;
   /** Route interne quand le module est actif (sinon non cliquable). */
   href?: string;
+  /** Libellé de nav alternatif (clé i18n complète) si le titre module ne convient pas. */
+  navLabelKey?: string;
 }
 
 export const MODULES: ModuleDef[] = [
@@ -48,7 +51,6 @@ export const MODULES: ModuleDef[] = [
     icon: Database,
     brique: 0,
     flag: "REFERENTIEL",
-    href: "/lots",
   },
   {
     id: "M0b",
@@ -75,6 +77,8 @@ export const MODULES: ModuleDef[] = [
     icon: Inbox,
     brique: 7,
     flag: "ONBOARDING",
+    href: "/demande",
+    navLabelKey: "nav.demande",
   },
   {
     id: "M2",
@@ -93,14 +97,18 @@ export const MODULES: ModuleDef[] = [
     icon: ClipboardList,
     brique: 5,
     flag: "DASHBOARD",
+    href: "/planning",
+    navLabelKey: "nav.planning",
   },
   {
     id: "M4",
     key: "booking",
     strate: "rail_lot",
-    icon: PackageCheck,
-    brique: 2,
-    flag: "LOTS",
+    icon: Boxes,
+    brique: 9,
+    flag: "BOOKING",
+    href: "/booking",
+    navLabelKey: "nav.booking",
   },
   {
     id: "M5",
@@ -109,6 +117,8 @@ export const MODULES: ModuleDef[] = [
     icon: PackageCheck,
     brique: 4,
     flag: "PORTAIL",
+    href: "/chargement",
+    navLabelKey: "nav.chargement",
   },
   {
     id: "M6",
@@ -117,6 +127,8 @@ export const MODULES: ModuleDef[] = [
     icon: FileCheck2,
     brique: 3,
     flag: "GATE",
+    href: "/gate",
+    navLabelKey: "nav.gate",
   },
   {
     id: "M7",
@@ -142,6 +154,8 @@ export const MODULES: ModuleDef[] = [
     icon: MapPinned,
     brique: 6,
     flag: "EMAIL_HUB",
+    href: "/qualite",
+    navLabelKey: "nav.qualite",
   },
   {
     id: "M10",
@@ -150,6 +164,8 @@ export const MODULES: ModuleDef[] = [
     icon: Wallet,
     brique: 8,
     flag: "COMPLETUDE",
+    href: "/finance",
+    navLabelKey: "nav.finance",
   },
 
   // 🔁 TRANSVERSES
@@ -160,6 +176,8 @@ export const MODULES: ModuleDef[] = [
     icon: Users,
     brique: 4,
     flag: "PORTAIL",
+    href: "/portail",
+    navLabelKey: "nav.portail",
   },
   {
     id: "T2",
@@ -176,6 +194,8 @@ export const MODULES: ModuleDef[] = [
     icon: LayoutDashboard,
     brique: 5,
     flag: "DASHBOARD",
+    href: "/dashboard",
+    navLabelKey: "nav.dashboard",
   },
   {
     id: "T4",
@@ -184,6 +204,8 @@ export const MODULES: ModuleDef[] = [
     icon: Bot,
     brique: 8,
     flag: "COMPLETUDE",
+    href: "/copilot",
+    navLabelKey: "nav.copilot",
   },
   {
     id: "T5",
@@ -192,6 +214,8 @@ export const MODULES: ModuleDef[] = [
     icon: BellRing,
     brique: 8,
     flag: "COMPLETUDE",
+    href: "/alertes",
+    navLabelKey: "nav.alertes",
   },
 ];
 

@@ -54,6 +54,24 @@ const FILES = [
   },
 ];
 
+// Preuves produit de démo (Brique 4). Faute de vraies photos dans le workspace,
+// on pousse un visuel « placeholder » déterministe pour que la photo boîte soit
+// affichable côté portail (URL signée). Les clés d'objet correspondent aux
+// `storage_path` du seed SQL, préfixe de bucket retiré (cf. policy Storage).
+// PNG 8×8 vert (couleur de marque) encodé en base64.
+const PLACEHOLDER_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAHElEQVR4nGNkYPhfz0BF" +
+    "wDhqIKMwjBoIABmQAxHZh1S3AAAAAElFTkSuQmCC",
+  "base64",
+);
+
+/** @type {{ bucket: string, dest: string, contentType: string, bytes: Buffer }[]} */
+const INLINE_FILES = [
+  { bucket: "preuves", dest: "LOT-2026-0003/boite.jpg", contentType: "image/png", bytes: PLACEHOLDER_PNG },
+  { bucket: "preuves", dest: "LOT-2026-0003/qr-charg.png", contentType: "image/png", bytes: PLACEHOLDER_PNG },
+  { bucket: "preuves", dest: "LOT-2026-0001/boite.jpg", contentType: "image/png", bytes: PLACEHOLDER_PNG },
+];
+
 const supabase = createClient(url, serviceKey, {
   auth: { persistSession: false },
 });
@@ -80,6 +98,22 @@ for (const file of FILES) {
     process.exitCode = 1;
   } else {
     console.log(`[seed-storage] ✓ ${file.bucket}/${file.dest}`);
+    uploaded++;
+  }
+}
+
+for (const file of INLINE_FILES) {
+  const { error } = await supabase.storage
+    .from(file.bucket)
+    .upload(file.dest, file.bytes, { contentType: file.contentType, upsert: true });
+
+  if (error) {
+    console.error(
+      `[seed-storage] échec ${file.bucket}/${file.dest} : ${error.message}`,
+    );
+    process.exitCode = 1;
+  } else {
+    console.log(`[seed-storage] ✓ ${file.bucket}/${file.dest} (placeholder)`);
     uploaded++;
   }
 }

@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  bookingConfirmationExtractSchema,
+  docVerificationSchema,
+  getBookingConfirmationProvider,
+  getDocVerifierProvider,
   getEmailProvider,
   getFieldTraceProvider,
   getLlmProvider,
@@ -9,6 +13,7 @@ import {
   sensorReadingSchema,
   trackingEventSchema,
 } from "@/lib/adapters";
+import type { VerifierDoc } from "@/lib/adapters/types";
 
 describe("TrackingProvider (mock)", () => {
   const tracking = getTrackingProvider();
@@ -86,13 +91,67 @@ describe("FieldTrace & Llm (mock)", () => {
   });
 });
 
+describe("DocVerifier (mock)", () => {
+  const verifier = getDocVerifierProvider();
+  const docs: VerifierDoc[] = [
+    {
+      id: "1",
+      type: "facture",
+      nomFichier: "inv.pdf",
+      metadata: { numeroConteneur: "OTPU6220580" },
+    },
+    {
+      id: "2",
+      type: "bl",
+      nomFichier: "bl.pdf",
+      metadata: { numeroConteneur: "OTPU6220589" },
+    },
+  ];
+
+  it("produit une sortie validée par Zod, déterministe", async () => {
+    const a = await verifier.verify({ ref: "OTPU6220580", documents: docs });
+    const b = await verifier.verify({ ref: "OTPU6220580", documents: docs });
+    expect(a).toEqual(b);
+    expect(() => docVerificationSchema.parse(a)).not.toThrow();
+    expect(a.anomalies.some((x) => x.code === "conteneur_incoherent")).toBe(true);
+  });
+});
+
+describe("BookingConfirmation (mock)", () => {
+  const parser = getBookingConfirmationProvider();
+
+  it("extrait n° conteneur, transporteur et date depuis un mail de confirmation", async () => {
+    const extract = await parser.parseConfirmation(
+      "Bonjour, confirmation de votre booking DFDS (Olympos Seaways) : conteneur OTPU6220580, départ prévu 2026-07-17.",
+    );
+    expect(() => bookingConfirmationExtractSchema.parse(extract)).not.toThrow();
+    expect(extract.numeroConteneur).toBe("OTPU6220580");
+    expect(extract.transporteurNom).toContain("DFDS");
+    expect(extract.dateDepart).toBe("2026-07-17");
+    expect(extract.mode).toBe("roro");
+  });
+
+  it("tolère un texte sans repère connu (champs null)", async () => {
+    const extract = await parser.parseConfirmation("Merci de votre patience.");
+    expect(extract.numeroConteneur).toBeNull();
+    expect(extract.transporteurNom).toBeNull();
+    expect(extract.mode).toBeNull();
+  });
+});
+
 describe("Fabrique d'adaptateurs — bascule mock/réel", () => {
   afterEach(() => {
     delete process.env.NK_TRACKING_PROVIDER;
+    delete process.env.NK_LLM_PROVIDER;
   });
 
   it("lève une erreur claire si on demande le réel non implémenté", () => {
     process.env.NK_TRACKING_PROVIDER = "real";
     expect(() => getTrackingProvider()).toThrowError(/non implémenté/);
+  });
+
+  it("le vérificateur documentaire bascule aussi en réel (non implémenté)", () => {
+    process.env.NK_LLM_PROVIDER = "real";
+    expect(() => getDocVerifierProvider()).toThrowError(/non implémenté/);
   });
 });

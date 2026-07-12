@@ -7,24 +7,39 @@
   "nav": {
     "home": "Accueil",
     "lots": "Lots",
+    "booking": "Booking",
+    "gate": "Documents & Gate",
+    "chargement": "Chargement",
+    "portail": "Portail client",
     "tracking": "Suivi conteneur",
+    "dashboard": "Dashboard",
+    "planning": "Planning",
+    "qualite": "Réception & qualité",
     "language": "Langue",
     "theme": "Thème",
     "themeLight": "Clair",
     "themeDark": "Sombre",
-    "themeSystem": "Système"
+    "themeSystem": "Système",
+    "collapse": "Replier le menu",
+    "expand": "Déplier le menu",
+    "open": "Ouvrir le menu",
+    "close": "Fermer le menu",
+    "demande": "Demande & onboarding",
+    "finance": "Finance",
+    "copilot": "Copilote IA",
+    "alertes": "Alertes",
+    "section": {
+      "flow": "Parcours du dossier",
+      "tools": "Outils transverses"
+    }
   },
   "home": {
     "heroKicker": "Plateforme",
-    "heroTitle": "Tout le flux export, autour d'un objet central : le lot",
-    "heroSubtitle": "Du premier contact client au retour qualité et à la clôture — chaque conteneur suivi de bout en bout.",
+    "heroTitle": "Suivez vos conteneurs, simplement.",
+    "heroSubtitle": "Choisissez un module ci-dessous pour commencer.",
+    "ctaTrack": "Suivre un conteneur",
     "modulesTitle": "Modules de la plateforme",
-    "modulesSubtitle": "Livrés brique par brique. Les modules à venir sont visibles mais désactivés.",
-    "recentLotsTitle": "Lots récents",
-    "recentLotsSubtitle": "Données réelles lues depuis Supabase.",
-    "viewAll": "Voir tous les lots",
-    "noLots": "Aucun lot. Lancez « npm run db:reset » pour peupler la base de démo.",
-    "dbError": "Base de données injoignable. Vérifiez .env.local et que Supabase tourne."
+    "modulesSubtitle": "Livrés brique par brique. Les modules à venir sont visibles mais désactivés."
   },
   "strate": {
     "socle": "Socle permanent",
@@ -33,7 +48,10 @@
     "transverse": "Couches transverses"
   },
   "module": {
-    "status": { "active": "Actif", "soon": "À venir" },
+    "status": {
+      "active": "Actif",
+      "soon": "À venir"
+    },
     "brique": "Brique {n}",
     "referentiel": {
       "title": "Référentiel",
@@ -108,6 +126,75 @@
       "desc": "Retard, excursion température, document manquant."
     }
   },
+  "tracking": {
+    "kicker": "M7 · Transport & suivi",
+    "title": "Suivez tout le voyage d'un conteneur",
+    "subtitle": "Saisissez un numéro de conteneur, de booking ou de lot pour voir sa frise, sa position, sa courbe de température et son score de risque d'arrivée.",
+    "searchLabel": "Numéro de conteneur, booking ou lot",
+    "searchPlaceholder": "ex. CAAU4027760, OLMP2605160, LOT-2026-0001…",
+    "searchButton": "Suivre",
+    "examplesLabel": "Exemples",
+    "emptyTitle": "Aucun conteneur suivi",
+    "emptyBody": "Saisissez un numéro ci-dessus, ou choisissez un exemple, pour afficher tout le voyage du lot.",
+    "notFoundTitle": "Aucun lot trouvé pour « {query} »",
+    "notFoundBody": "Vérifiez le numéro saisi (conteneur, booking ou référence de lot) et réessayez.",
+    "dbError": "Base de données injoignable. Vérifiez .env.local et que Supabase tourne.",
+    "modes": {
+      "sea": "Maritime",
+      "roro": "RoRo",
+      "air": "Aérien",
+      "road": "Route"
+    },
+    "header": {
+      "client": "Client",
+      "mode": "Mode",
+      "container": "Référence",
+      "consigne": "Consigne",
+      "harvest": "Récolte",
+      "carrier": "Transporteur"
+    },
+    "map": {
+      "title": "Position & trajet",
+      "unavailable": "Carte indisponible — WebGL est désactivé dans ce navigateur.",
+      "currentPosition": "Position actuelle : {lat}, {lng}",
+      "openInOsm": "Voir sur OpenStreetMap"
+    },
+    "timeline": {
+      "title": "Frise du voyage"
+    },
+    "eventCodes": {
+      "booking": "Booking",
+      "loading": "Chargement",
+      "departure": "Départ",
+      "transit": "En transit",
+      "port_call": "Escale portuaire",
+      "arrival": "Arrivée",
+      "customs": "Douane",
+      "delivery": "Livraison"
+    },
+    "sensor": {
+      "title": "Température & humidité (datalogger)",
+      "temp": "Température",
+      "humidity": "Humidité",
+      "target": "Consigne",
+      "noData": "Aucune mesure capteur disponible pour ce lot."
+    },
+    "risk": {
+      "title": "Score de risque d'arrivée",
+      "computed": "Calculé à partir de l'âge à l'expédition, de la durée de transit et des excursions de température.",
+      "dayUnit": "j",
+      "band": {
+        "faible": "Risque faible",
+        "moyen": "Risque modéré",
+        "eleve": "Risque élevé"
+      },
+      "factors": {
+        "harvestAge": "Âge à l'expédition",
+        "transit": "Durée de transit",
+        "excursion": "Excursion de température"
+      }
+    }
+  },
   "lotStatus": {
     "booking": "Booking",
     "chargement": "Chargement",
@@ -123,10 +210,541 @@
     "client": "Client",
     "product": "Produit",
     "destination": "Destination",
+    "mode": "Mode",
+    "departure": "Départ → Arrivée",
     "status": "Statut",
     "risk": "Risque"
   },
+  "lots": {
+    "kicker": "M4 · Objet Lot",
+    "title": "Vos lots, de bout en bout",
+    "subtitle": "La liste filtrable de toutes vos expéditions. Cliquez un lot pour ouvrir sa fiche 360° : voyage, documents, qualité et origine.",
+    "count": "{count, plural, =0 {Aucun lot} one {# lot} other {# lots}}",
+    "empty": "Aucun lot ne correspond à ces filtres.",
+    "reset": "Réinitialiser les filtres",
+    "filters": {
+      "client": "Client",
+      "product": "Produit",
+      "country": "Pays",
+      "status": "Statut",
+      "all": "Tous"
+    },
+    "departurePlanned": "prévu",
+    "departureActual": "réalisé",
+    "backToList": "Tous les lots",
+    "notFound": "Lot introuvable.",
+    "notFoundBody": "Ce lot n'existe pas ou a été supprimé.",
+    "noContainer": "Pas de n° de conteneur",
+    "noTracking": "Le voyage sera disponible dès qu'un numéro de conteneur sera rattaché à ce lot (booking confirmé).",
+    "tabs": {
+      "voyage": "Voyage",
+      "gate": "Conformité & Gate",
+      "chargement": "Chargement & preuves",
+      "documents": "Documents",
+      "quality": "Qualité",
+      "origin": "Origine",
+      "finance": "Finance",
+      "alertes": "Alertes"
+    },
+    "documents": {
+      "title": "Documents du dossier",
+      "empty": "Aucun document déposé pour ce lot.",
+      "hint": "Déposez et vérifiez les documents dans l'onglet « Conformité & Gate ».",
+      "type": {
+        "facture": "Facture",
+        "bl": "Connaissement (BL)",
+        "phyto": "Certificat phytosanitaire",
+        "packing_list": "Packing list",
+        "certificat_origine": "Certificat d'origine",
+        "ched_pp": "CHED-PP",
+        "autre": "Autre document"
+      },
+      "status": {
+        "recu": "Reçu",
+        "verifie": "Vérifié",
+        "anomalie": "Anomalie"
+      }
+    },
+    "quality": {
+      "title": "Rapports qualité",
+      "empty": "Aucun rapport qualité pour ce lot.",
+      "hint": "Les retours qualité importés par email sont analysés par IA (défauts, score, verdict) et rattachés au lot.",
+      "score": "Score",
+      "defects": "Défauts relevés",
+      "source": {
+        "qc_depart": "QC départ",
+        "retour_client": "Retour client"
+      },
+      "verdict": {
+        "vert": "Conforme",
+        "orange": "Sous réserve",
+        "rouge": "Non conforme"
+      }
+    },
+    "origin": {
+      "title": "Origine & traçabilité champ",
+      "empty": "Aucune donnée d'origine pour ce lot.",
+      "hint": "Le connecteur Cropwise rattache ce lot à sa parcelle/récolte — cliquez sur « Synchroniser depuis Cropwise ».",
+      "site": "Site",
+      "plot": "Parcelle",
+      "variety": "Variété",
+      "harvest": "Récolte",
+      "treatments": "Traitements",
+      "sync": "Synchroniser depuis Cropwise",
+      "syncing": "Synchronisation…"
+    }
+  },
+  "booking": {
+    "kicker": "M4 · Booking",
+    "title": "Dossier de réservation & confirmation",
+    "subtitle": "Le canal de réservation varie (transporteur direct, broker, transitaire, téléphone…) — l'outil ne l'impose pas. Il standardise le dossier à envoyer, puis fait naître le lot dès qu'un geste unique confirme le booking : n° de conteneur, transporteur, date de départ.",
+    "form": {
+      "title": "Nouvelle demande",
+      "hint": "Génère le dossier de réservation (texte standardisé, copiable vers n'importe quel canal).",
+      "client": "Client",
+      "clientPlaceholder": "Choisir un client",
+      "produit": "Produit",
+      "variete": "Variété",
+      "quantite": "Quantité",
+      "unite": "Unité",
+      "incoterm": "Incoterm",
+      "mode": "Mode de transport",
+      "modeSea": "Maritime",
+      "modeRoro": "RoRo",
+      "modeAir": "Aérien",
+      "modeRoad": "Routier",
+      "destinationPays": "Pays destination",
+      "destinationPort": "Port destination",
+      "dateSouhaitee": "Date de départ souhaitée",
+      "submit": "Générer le dossier",
+      "dossierCree": "Dossier généré — voir le registre ci-dessous."
+    },
+    "list": {
+      "title": "Registre des dossiers",
+      "hint": "Copiez le dossier vers votre canal habituel, puis confirmez dès que le transporteur répond.",
+      "empty": "Aucun dossier de réservation pour l'instant.",
+      "copierDossier": "Copier le dossier",
+      "copie": "Copié !",
+      "marquerEnvoye": "Marquer envoyé",
+      "confirmer": "Confirmer ce dossier",
+      "masquerConfirmation": "Masquer",
+      "statut": {
+        "brouillon": "Brouillon",
+        "envoye": "Envoyé",
+        "confirme": "Confirmé"
+      }
+    },
+    "confirm": {
+      "pasteEmail": "Coller un mail de confirmation (optionnel)",
+      "pasteEmailPlaceholder": "Collez ici le texte du mail de confirmation reçu (transporteur, broker, transitaire…)",
+      "analyser": "Analyser (IA)",
+      "parseDone": "Champs pré-remplis — vérifiez avant de confirmer.",
+      "parseError": "Lecture du mail impossible.",
+      "numeroConteneur": "N° de conteneur",
+      "transporteurNom": "Transporteur",
+      "dateDepart": "Date de départ",
+      "submit": "Confirmer le booking",
+      "lotCree": "Lot {reference} créé"
+    },
+    "quick": {
+      "title": "Réservation directe",
+      "hint": "Sans dossier préalable — quand le booking a été traité entièrement en dehors de l'outil.",
+      "client": "Client",
+      "clientPlaceholder": "Choisir un client",
+      "produit": "Produit",
+      "mode": "Mode de transport",
+      "modeSea": "Maritime",
+      "modeRoro": "RoRo",
+      "modeAir": "Aérien",
+      "modeRoad": "Routier"
+    }
+  },
+  "gate": {
+    "gateTitle": "Gate « Check OK »",
+    "run": "Lancer la vérification IA",
+    "running": "Vérification…",
+    "mailSent": "Mail « Check OK » envoyé au client / broker",
+    "status": {
+      "vert": "Check OK — expédition autorisée",
+      "rouge": "Bloqué — anomalies à corriger",
+      "en_attente": "En attente de vérification"
+    },
+    "help": {
+      "vert": "Documents complets et conformité validée : la Gate est ouverte et le mail a été envoyé au client / broker.",
+      "rouge": "{anomalies} anomalie(s) bloquante(s) et {conformite} point(s) de conformité en échec. L'expédition reste bloquée tant que tout n'est pas au vert.",
+      "en_attente": "Aucune vérification n'a encore été lancée sur ce dossier. Cliquez « Lancer la vérification IA » pour contrôler la cohérence des documents et la conformité."
+    },
+    "conformite": {
+      "title": "Checklist de conformité (pays / produit)",
+      "empty": "Lancez la vérification pour évaluer la conformité du dossier."
+    },
+    "confStatut": {
+      "ok": "Conforme",
+      "manquant": "Manquant",
+      "non_conforme": "Non conforme",
+      "non_applicable": "Non applicable"
+    },
+    "anomalies": {
+      "title": "Anomalies documentaires (vérificateur IA)",
+      "pending": "Lancez la vérification pour détecter les incohérences entre documents.",
+      "none": "Aucune incohérence détectée entre les documents."
+    },
+    "severite": {
+      "mineure": "Anomalie mineure",
+      "majeure": "Anomalie majeure",
+      "critique": "Anomalie critique"
+    },
+    "documents": {
+      "title": "Pièces du dossier"
+    },
+    "upload": {
+      "type": "Type de document",
+      "file": "Fichier",
+      "submit": "Déposer",
+      "uploading": "Envoi…"
+    },
+    "journal": {
+      "title": "Journal de la Gate",
+      "check_ok": "Gate au vert (Check OK)",
+      "mail_envoye": "Mail « Check OK » envoyé",
+      "override": "Forçage manuel de la Gate"
+    },
+    "overview": {
+      "kicker": "M6 · Documents & Conformité",
+      "title": "La Gate « Check OK » de vos dossiers",
+      "subtitle": "Vue d'ensemble du statut de conformité par lot. Rien ne part tant que documents et conformité ne sont pas au vert. Cliquez un lot pour ouvrir son dossier."
+    }
+  },
+  "qualite": {
+    "kicker": "T2 · Hub email & M9 · Qualité client",
+    "title": "La boucle qualité, automatisée",
+    "subtitle": "Les retours qualité arrivent par email : le PDF est importé, rattaché au bon lot et analysé par IA (défauts, score, verdict). Les tendances se consolident par produit, client et site.",
+    "analyzedBy": "Analysé par {model}",
+    "severite": {
+      "mineur": "Mineur",
+      "majeur": "Majeur",
+      "critique": "Critique"
+    },
+    "categorie": {
+      "aspect": "Aspect",
+      "maturite": "Maturité",
+      "calibre": "Calibre",
+      "parage": "Parage",
+      "sanitaire": "Sanitaire",
+      "autre": "Autre"
+    },
+    "inbox": {
+      "title": "Boîte de réception (mock)",
+      "subtitle": "Mails entrants avec pièce jointe PDF. Importez pour rattacher au lot et lancer l'analyse IA.",
+      "empty": "Aucun mail dans la boîte de réception.",
+      "noPdf": "Pas de PDF",
+      "import": "Importer & analyser",
+      "reimport": "Ré-analyser",
+      "matched": "Rattaché à {ref}",
+      "unmatched": "Lot non résolu",
+      "status": {
+        "rattache": "Importé",
+        "non_rattache": "Non rattaché",
+        "erreur": "Erreur"
+      }
+    },
+    "trends": {
+      "title": "Tendances qualité",
+      "subtitle": "Répartition des verdicts et défauts récurrents, agrégés sur les retours analysés.",
+      "empty": "Aucune analyse qualité pour l'instant. Importez un retour depuis la boîte de réception.",
+      "emptyGroup": "Aucune donnée.",
+      "topDefauts": "Défauts les plus fréquents",
+      "byProduit": "Par produit",
+      "byClient": "Par client",
+      "bySite": "Par site"
+    },
+    "comparison": {
+      "depart": "Départ (photo boîte)",
+      "retour": "Arrivée (retour analysé)",
+      "photoPresent": "Photo présente",
+      "noPhoto": "Pas de photo de départ",
+      "noRetour": "Pas encore de retour"
+    }
+  },
+  "chargement": {
+    "kicker": "M5 · Conditionnement & chargement",
+    "title": "Preuve de départ, au chargement",
+    "subtitle": "Scannez le QR ou photographiez une boîte au chargement. La photo boîte devient visible du client dans son portail ; chaque capture est horodatée et tracée dans la frise du lot.",
+    "hasPhoto": "Photo boîte",
+    "preuveCount": "{count, plural, =0 {Aucune preuve} one {# preuve} other {# preuves}}",
+    "panelTitle": "Preuves de chargement",
+    "panelHelp": "Déposez la photo d'une boîte de produit (visible du client) et/ou le QR / la photo de chargement (interne). Chaque preuve horodate et trace le chargement du lot.",
+    "captureTitle": "Nouvelle preuve",
+    "gallery": "Preuves rattachées",
+    "empty": "Aucune preuve rattachée à ce lot pour l'instant.",
+    "visibleClient": "Visible client",
+    "internalOnly": "Interne",
+    "preuveType": {
+      "photo_boite": "Photo boîte produit",
+      "qr_chargement": "QR / photo de chargement",
+      "autre": "Autre preuve"
+    },
+    "upload": {
+      "type": "Type de preuve",
+      "file": "Image",
+      "submit": "Capturer",
+      "uploading": "Envoi…"
+    }
+  },
+  "portail": {
+    "space": "Espace client",
+    "logout": "Déconnexion",
+    "kicker": "Portail client",
+    "welcome": "Bonjour, {client}",
+    "subtitle": "Suivez vos lots, leurs statuts, vos documents et la photo produit au départ.",
+    "myLots": "{count, plural, =0 {Aucun lot} one {# lot} other {# lots}}",
+    "empty": "Aucun lot ne vous est rattaché pour l'instant.",
+    "backToLots": "Mes lots",
+    "notFound": "Ce lot n'existe pas ou ne vous est pas accessible.",
+    "login": {
+      "kicker": "Portail client",
+      "title": "Connexion à votre espace",
+      "subtitle": "Saisissez votre email professionnel : vous recevrez un lien de connexion sécurisé (magic link), sans mot de passe.",
+      "emailLabel": "Email",
+      "submit": "Recevoir le lien de connexion",
+      "sending": "Envoi…",
+      "sent": "Un lien de connexion a été envoyé à {email}. Ouvrez-le pour accéder à votre espace.",
+      "error": "Lien invalide ou expiré. Merci de redemander un lien de connexion."
+    },
+    "detail": {
+      "departure": "Départ",
+      "arrival": "Arrivée",
+      "photoTitle": "Photo produit au départ",
+      "noPhoto": "Aucune photo produit disponible pour ce lot.",
+      "timelineTitle": "Frise du lot",
+      "documentsTitle": "Documents",
+      "noDocuments": "Aucun document disponible pour ce lot.",
+      "qualityTitle": "Contrôles qualité"
+    }
+  },
+  "dashboard": {
+    "kicker": "T3 · Dashboard & KPIs",
+    "title": "Pilotez votre service, d'un coup d'œil",
+    "subtitle": "Filtrez par client, produit, pays ou niveau de risque. Le taux de service et le taux de retard se recalculent sur les lots correspondants.",
+    "empty": "Aucun lot ne correspond à ces filtres.",
+    "reset": "Réinitialiser les filtres",
+    "filters": {
+      "client": "Client",
+      "product": "Produit",
+      "country": "Pays",
+      "risk": "Risque",
+      "all": "Tous"
+    },
+    "kpi": {
+      "service": "Taux de service",
+      "serviceCaption": "{count, plural, =0 {Aucun lot arrivé évalué} one {sur # lot arrivé} other {sur # lots arrivés}}",
+      "late": "Taux de retard",
+      "lateCaption": "{count, plural, =0 {aucun lot en retard} one {# lot en retard} other {# lots en retard}}",
+      "avgDelay": "Retard moyen",
+      "avgDelayCaption": "sur les lots arrivés en retard",
+      "lots": "Lots",
+      "lotsCaption": "dont {transit} en transit"
+    },
+    "charts": {
+      "byStatut": "Lots par statut",
+      "byCountry": "Lots par pays",
+      "byRisk": "Répartition du risque"
+    }
+  },
+  "planning": {
+    "kicker": "M3 · Commande & Planning",
+    "title": "Planning de départ, prévu vs réalisé",
+    "subtitle": "Le planning semaine par semaine, importé de votre Excel. Chaque départ prévu est rapproché du lot réellement parti pour visualiser les glissements.",
+    "empty": "Aucune ligne de planning. Importez votre fichier Excel pour commencer.",
+    "weekAbbr": " sem.",
+    "import": {
+      "title": "Importer le planning (Excel / CSV)",
+      "help": "Colonnes attendues : semaine, client, produit, variété, destination, quantité prévue, unité, lot (référence du lot réalisé, optionnel). En-têtes tolérants.",
+      "file": "Fichier",
+      "submit": "Importer",
+      "uploading": "Import…",
+      "sample": "Télécharger un fichier d'exemple",
+      "success": "{inserted} ligne(s) importée(s), {lots} rattachée(s) à un lot réalisé.",
+      "linePrefix": "Ligne {row} : "
+    },
+    "summary": {
+      "total": "Départs prévus",
+      "realise": "Réalisés",
+      "glissement": "Glissements",
+      "planifie": "À venir",
+      "realisation": "Taux de réalisation"
+    },
+    "etat": {
+      "planifie": "À venir",
+      "realise": "Réalisé",
+      "glissement": "Glissement"
+    },
+    "table": {
+      "week": "Semaine",
+      "client": "Client",
+      "product": "Produit",
+      "destination": "Destination",
+      "planned": "Qté prévue",
+      "actual": "Lot réalisé",
+      "state": "État"
+    }
+  },
   "footer": {
     "built": "Fondations (Brique 0) — Next.js · Supabase · adaptateurs mock-first."
+  },
+  "certif": {
+    "ggap": "GlobalG.A.P.",
+    "grasp": "GRASP",
+    "brcgs": "BRCGS",
+    "smeta": "SMETA",
+    "sedex": "Sedex"
+  },
+  "demande": {
+    "kicker": "M1 · M2 · M0c — Rail client",
+    "title": "Demande, matching des certifications & onboarding",
+    "subtitle": "Une demande arrive (produit × pays × client). La plateforme vérifie automatiquement la couverture des certifications via le coffre : si tout est couvert, le pack de présentation et les certifs partent automatiquement ; sinon, une alerte et un workflow de correction sont créés.",
+    "form": {
+      "title": "Nouvelle demande",
+      "hint": "Renseignez le produit et le pays : le matching des certifications est immédiat.",
+      "client": "Client / prospect",
+      "produit": "Produit",
+      "produitPlaceholder": "ex. Mangue, Brocoli…",
+      "pays": "Pays de destination",
+      "paysPlaceholder": "ex. UK, FR…",
+      "email": "Email de contact",
+      "volume": "Volume (optionnel)",
+      "submit": "Recevoir & qualifier",
+      "resultSuffisant": "Certifications suffisantes — pack envoyé automatiquement.",
+      "resultInsuffisant": "Certifications insuffisantes — workflow de correction déclenché.",
+      "mailSent": "Pack de présentation + certifications envoyés (mock) au client.",
+      "tachesCreees": "{n} tâche(s) de correction créée(s)."
+    },
+    "list": {
+      "title": "Demandes reçues",
+      "empty": "Aucune demande pour l'instant.",
+      "packEnvoye": "Pack de présentation + certifications envoyés (mock).",
+      "taches": "Workflow de correction"
+    },
+    "decision": {
+      "suffisant": "Suffisant",
+      "insuffisant": "Insuffisant",
+      "en_attente": "En attente"
+    },
+    "onboard": {
+      "action": "Créer l'espace client",
+      "created": "Espace client créé ({email}).",
+      "done": "Espace client créé"
+    },
+    "coffre": {
+      "title": "Coffre à certifications",
+      "subtitle": "Certifications Natural Kiss, leur couverture produit/pays et leur validité. Le matching s'appuie strictement sur ce coffre.",
+      "aucunProduit": "aucun produit couvert",
+      "valableJusqu": "valable jusqu'au {date}",
+      "alertesTitle": "Certifications proches de l'expiration",
+      "expiree": "expirée depuis le {date}",
+      "expireDans": "expire dans {jours} j (le {date})",
+      "statut": {
+        "valide": "Valide",
+        "suspendue": "Suspendue",
+        "expiree": "Expirée"
+      }
+    }
+  },
+  "finance": {
+    "overview": {
+      "kicker": "M10 · Finance & clôture",
+      "title": "Statut de paiement & litiges",
+      "subtitle": "Statut de paiement par lot, cohérence facture (croisée avec le vérificateur documentaire IA) et litiges — un suivi léger, pas un moteur comptable.",
+      "litigesCount": "{count, plural, one {# litige ouvert} other {# litiges ouverts}}"
+    },
+    "payment": {
+      "title": "Statut de paiement",
+      "label": "Statut",
+      "amount": "Montant",
+      "dueDate": "Échéance",
+      "status": {
+        "label": "Statut",
+        "a_venir": "À venir",
+        "en_attente": "En attente",
+        "partiel": "Partiel",
+        "paye": "Payé",
+        "litige": "En litige"
+      }
+    },
+    "invoiceCoherence": {
+      "coherente": "Facture cohérente",
+      "incoherente": "Facture incohérente",
+      "inconnue": "Non vérifiée"
+    },
+    "litiges": {
+      "title": "Litiges",
+      "open": "Ouvrir un litige",
+      "empty": "Aucun litige sur ce lot.",
+      "type": "Type",
+      "amount": "Montant contesté",
+      "description": "Description",
+      "submit": "Enregistrer le litige",
+      "resolve": "Marquer résolu",
+      "resolvedNote": "Résolu depuis la fiche lot.",
+      "types": {
+        "facture_contestee": "Facture contestée",
+        "sous_evaluation_douaniere": "Sous-évaluation douanière",
+        "qualite": "Qualité",
+        "autre": "Autre"
+      },
+      "statut": {
+        "ouvert": "Ouvert",
+        "en_cours": "En cours",
+        "resolu": "Résolu",
+        "clos": "Clos"
+      }
+    },
+    "destruction": {
+      "title": "Certificat de destruction",
+      "issue": "Émettre un certificat de destruction",
+      "defaultMotif": "Lot rejeté / détruit à l'arrivée."
+    },
+    "saving": "Enregistrement…",
+    "save": "Enregistrer"
+  },
+  "alertes": {
+    "overview": {
+      "kicker": "T5 · Alertes",
+      "title": "Alertes proactives",
+      "subtitle": "Retard navire/vol, excursion de température, document manquant, risque de quarantaine — calculées à partir du tracking, des capteurs et de la Gate."
+    },
+    "lotTitle": "Alertes",
+    "none": "Aucune alerte active.",
+    "scan": "Scanner ce lot",
+    "scanAll": "Scanner tous les lots",
+    "scanning": "Scan en cours…",
+    "type": {
+      "retard_navire": "Retard navire/vol",
+      "excursion_temperature": "Excursion de température",
+      "document_manquant": "Document manquant",
+      "risque_quarantaine": "Risque de quarantaine"
+    },
+    "severite": {
+      "info": "Info",
+      "avertissement": "Avertissement",
+      "critique": "Critique"
+    }
+  },
+  "copilot": {
+    "overview": {
+      "kicker": "T4 · Copilote IA",
+      "title": "Résumer les fils, générer des documents",
+      "subtitle": "Choisissez un fil d'emails pour obtenir une synthèse IA, un brouillon de réponse et, quand un lot est rattaché, une instruction sheet."
+    },
+    "messageCount": "{count, plural, one {# message} other {# messages}}",
+    "summarize": "Résumer le fil",
+    "running": "En cours…",
+    "summary": "Résumé",
+    "actions": "Actions suggérées",
+    "draftReply": "Brouillon de réponse",
+    "model": "Modèle",
+    "generateSheet": "Instruction sheet",
+    "generate": "Générer",
+    "empty": "Aucun fil d'emails disponible."
   }
 }
