@@ -655,6 +655,15 @@
         "suspendue": "Suspendue",
         "expiree": "Expirée"
       }
+    },
+    "outbox": {
+      "title": "Emails envoyés (démo)",
+      "subtitle": "Journal des envois automatiques (mock) : pack de présentation et onboarding.",
+      "empty": "Aucun email envoyé pour l'instant.",
+      "categorie": {
+        "pack_certif": "Pack certifications",
+        "onboarding": "Onboarding"
+      }
     }
   },
   "finance": {

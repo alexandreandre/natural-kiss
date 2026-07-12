@@ -655,6 +655,15 @@
         "suspendue": "Suspended",
         "expiree": "Expired"
       }
+    },
+    "outbox": {
+      "title": "Sent emails (demo)",
+      "subtitle": "Log of automatic (mock) sends: presentation pack and onboarding.",
+      "empty": "No email sent yet.",
+      "categorie": {
+        "pack_certif": "Certification pack",
+        "onboarding": "Onboarding"
+      }
     }
   },
   "finance": {

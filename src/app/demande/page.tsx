@@ -1,4 +1,4 @@
-import { BellRing, ShieldCheck } from "lucide-react";
+import { BellRing, Mail, ShieldCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -22,7 +22,7 @@ export default async function DemandePage() {
   if (!isFeatureEnabled("ONBOARDING")) notFound();
 
   const t = await getTranslations();
-  const { demandes, coffre, alertes } = await getOnboardingOverview();
+  const { demandes, coffre, alertes, emails } = await getOnboardingOverview();
 
   return (
     <div className="flex flex-col gap-10">
@@ -198,6 +198,36 @@ export default async function DemandePage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* ── Emails envoyés (démo) ────────────────────────────────────── */}
+      <section>
+        <h2 className="font-display flex items-center gap-2 text-xl font-medium tracking-tight">
+          <Mail className="text-primary size-5" />
+          {t("demande.outbox.title")}
+        </h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          {t("demande.outbox.subtitle")}
+        </p>
+        {emails.length === 0 ? (
+          <p className="text-muted-foreground mt-3 text-sm">
+            {t("demande.outbox.empty")}
+          </p>
+        ) : (
+          <ul className="divide-border/60 border-border mt-4 divide-y rounded-[4px] border">
+            {emails.map((e) => (
+              <li key={e.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <span className="border-primary/25 bg-primary/5 text-primary rounded-[3px] border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] uppercase">
+                  {t(`demande.outbox.categorie.${e.categorie}`)}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm">{e.subject}</span>
+                <span className="text-muted-foreground/70 truncate font-mono text-[11px]">
+                  {e.toEmail}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
