@@ -303,3 +303,7 @@ dans un cookie et se change depuis l'en-tête. Aucune duplication de routes.
 2. `npm run dev` → la home liste les lots issus de Supabase (dont `CAAU4027760`,
    le lot rejeté `OLMP2605160`, le conteneur incohérent `OTPU6220580`).
 3. `npm test` et `npm run test:e2e` → tout est vert.
+4. `/nouvelle-demande` (public) → un client soumet « Brocoli / Tenderstem → UK » →
+   confirmation neutre ; la demande apparaît sur `/demande` (interne) avec le pack
+   envoyé (voir « Emails envoyés (démo) »), puis « Créer l'espace client » génère
+   les documents et l'email d'onboarding ; le client les retrouve dans `/portail`.
