@@ -21,9 +21,9 @@ test("hub qualité : les tendances par produit/client/site sont affichées", asy
 }) => {
   await page.goto("/qualite");
   await expect(page.getByRole("heading", { name: /Tendances qualité/i })).toBeVisible();
-  await expect(page.getByText(/Par produit/i)).toBeVisible();
-  await expect(page.getByText(/Par client/i)).toBeVisible();
-  await expect(page.getByText(/Par site/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Par produit" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Par client" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Par site" })).toBeVisible();
 });
 
 test("fiche lot : le retour analysé apparaît (défauts extraits)", async ({ page }) => {

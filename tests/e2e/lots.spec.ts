@@ -30,7 +30,7 @@ test("navigation liste → fiche : le voyage (Brique 1) s'affiche dans la fiche"
 
   // Bascule sur l'onglet Qualité → un rapport (verdict) est visible.
   await page.getByRole("tab", { name: "Qualité" }).click();
-  await expect(page.getByText("Non conforme")).toBeVisible();
+  await expect(page.getByText("Non conforme", { exact: true }).first()).toBeVisible();
 });
 
 test("filtre par statut : ne conserve que les lots rejetés", async ({ page }) => {
