@@ -67,10 +67,19 @@ export interface DemandeRow {
   taches: TacheRow[];
 }
 
+export interface EmailEnvoyeRow {
+  id: string;
+  categorie: EmailCategorie;
+  toEmail: string;
+  subject: string;
+  createdAt: string;
+}
+
 export interface OnboardingOverview {
   demandes: DemandeRow[];
   coffre: CoffreCertRow[];
   alertes: ExpirationAlert[];
+  emails: EmailEnvoyeRow[];
 }
 
 const EXPIRATION_SEUIL_JOURS = 30;
@@ -105,7 +114,7 @@ export async function loadCoffre(): Promise<CoffreCert[]> {
 export async function getOnboardingOverview(): Promise<OnboardingOverview> {
   const supabase = createAdminClient();
 
-  const [certifs, demandes, taches] = await Promise.all([
+  const [certifs, demandes, taches, emails] = await Promise.all([
     supabase
       .from("certifications")
       .select("id, type, organisme, numero, produits, pays, statut, date_expiration")
@@ -121,6 +130,11 @@ export async function getOnboardingOverview(): Promise<OnboardingOverview> {
       .select(
         "id, demande_id, certif_type, produit, pays, libelle, statut, assignee, echeance",
       ),
+    supabase
+      .from("emails_envoyes")
+      .select("id, categorie, to_email, subject, created_at")
+      .order("created_at", { ascending: false })
+      .limit(10),
   ]);
 
   if (certifs.error)
@@ -129,6 +143,8 @@ export async function getOnboardingOverview(): Promise<OnboardingOverview> {
     throw new Error(`Lecture des demandes impossible : ${demandes.error.message}`);
   if (taches.error)
     throw new Error(`Lecture des tâches impossible : ${taches.error.message}`);
+  if (emails.error)
+    throw new Error(`Lecture des emails impossible : ${emails.error.message}`);
 
   const now = new Date();
   const coffreCerts = (certifs.data ?? []).map(toCoffreCert);
@@ -197,6 +213,13 @@ export async function getOnboardingOverview(): Promise<OnboardingOverview> {
     alertes: [...alertesByType.values()].sort(
       (a, b) => a.joursRestants - b.joursRestants,
     ),
+    emails: (emails.data ?? []).map((e) => ({
+      id: e.id,
+      categorie: e.categorie,
+      toEmail: e.to_email,
+      subject: e.subject,
+      createdAt: e.created_at,
+    })),
   };
 }
 
