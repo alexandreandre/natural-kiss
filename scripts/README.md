@@ -5,6 +5,7 @@ Exporte **tout un canal Slack** (messages, threads, médias) dans `tmp/slack/<ch
 compatible VPN (requêtes HTTPS classiques).
 
 Produit, par canal :
+
 - `transcript.md` — lisible, chronologique, mentions `@Nom` résolues (le fichier que Cursor indexe le mieux)
 - `messages.jsonl` — un message par ligne, **normalisé** (heure, auteur, texte,
   fichiers) sans le bruit Slack — pratique pour un LLM ou du scripting
@@ -34,14 +35,14 @@ Le script a besoin d'un token qui lit le canal. Deux choix :
 1. <https://api.slack.com/apps> → **Create New App** → **From scratch** → nomme-la,
    choisis ton workspace → **Create App**.
 2. Menu de gauche → **OAuth & Permissions**.
-3. **Scopes → User Token Scopes** (⚠️ *User*, pas *Bot*) → **Add an OAuth Scope**, ajoute :
+3. **Scopes → User Token Scopes** (⚠️ _User_, pas _Bot_) → **Add an OAuth Scope**, ajoute :
    `channels:history`, `channels:read`, `groups:history`, `groups:read`, `files:read`, `users:read`.
 4. Remonte en haut → **Install to Workspace** → **Allow**.
    (Si validation admin requise : un admin approuve, puis reviens.)
 5. Copie le **User OAuth Token** (`xoxp-…`).
 
 > ⚠️ Ne confonds pas avec les « App Configuration Tokens » de la page d'accueil
-> (`xoxe.xoxp-…`, *Expires in 12 hours*) : ce ne sont PAS les bons.
+> (`xoxe.xoxp-…`, _Expires in 12 hours_) : ce ne sont PAS les bons.
 
 **b) Token bot (`xoxb-…`)** — identité de l'app, partageable en équipe. Mêmes scopes
 sous **Bot Token Scopes**, réinstalle, puis dans Slack : `/invite @NomDeTonApp` dans le
@@ -76,7 +77,7 @@ Pour un autre canal : `./scripts/slack-pull --list`, puis mets l'ID dans `SLACK_
 
 ## Scopes selon le type de canal (rappel)
 
-| Type de canal | Scopes requis                                                    |
-|---------------|------------------------------------------------------------------|
-| Public        | `channels:history`, `channels:read`, `files:read`, `users:read`  |
-| Privé         | `groups:history`, `groups:read`, `files:read`, `users:read`      |
+| Type de canal | Scopes requis                                                   |
+| ------------- | --------------------------------------------------------------- |
+| Public        | `channels:history`, `channels:read`, `files:read`, `users:read` |
+| Privé         | `groups:history`, `groups:read`, `files:read`, `users:read`     |

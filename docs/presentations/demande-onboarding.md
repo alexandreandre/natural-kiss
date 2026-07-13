@@ -92,6 +92,7 @@ le client a tout de suite une image carrée et professionnelle de Natural Kiss.*
 > maintenant en quelques secondes, et le client a une image beaucoup plus pro. »
 
 **Les 3 messages à faire passer :**
+
 1. **Gain de temps** — plus de vérifications ni d'envois manuels.
 2. **Moins d'erreurs** — l'outil dit tout de suite ce qui manque (fini les certifs
    oubliées / refaites en boucle).
